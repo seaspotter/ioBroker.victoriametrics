@@ -397,6 +397,8 @@ The current retention is visible in three places (all read-only, read once from 
 ### 0.1.0 (2026-08-28)
 * (SeaSpotter) Write path to VictoriaMetrics (native JSON-lines import API), connection test, buffer/retry, History tab integration
 
+Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
+
 ## License
 MIT License
 
