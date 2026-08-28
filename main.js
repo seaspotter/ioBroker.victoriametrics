@@ -5,6 +5,7 @@ const CONFIG = require('./lib/config');
 const metricName = require('./lib/metricName');
 const { VmClient } = require('./lib/vmClient');
 const { SeriesBuffer } = require('./lib/buffer');
+const { handleGetHistory } = require('./lib/history');
 
 /**
  * Parst ein optionales, aus dem Admin-UI kommendes Zahlenfeld (kann Zahl,
@@ -475,12 +476,17 @@ class Victoriametrics extends utils.Adapter {
     }
 
     /**
-     * Some message was sent to this instance over message box (Verwendet für den
-     * Verbindungstest-Button im Admin-UI).
+     * Some message was sent to this instance over message box (Verbindungstest-Button
+     * im Admin-UI, sowie getHistory-Anfragen von vis-Chart-Widgets).
      *
      * @param {ioBroker.Message} obj - Empfangene Nachricht
      */
     async onMessage(obj) {
+        if (obj.command === 'getHistory') {
+            await handleGetHistory(this, obj);
+            return;
+        }
+
         if (obj.command !== 'testConnection') {
             return;
         }

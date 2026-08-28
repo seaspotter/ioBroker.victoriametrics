@@ -10,10 +10,12 @@ dessen [JSON-Lines-Import-API](https://docs.victoriametrics.com/#how-to-import-d
 mit echten Prometheus-Labels statt Feld-Namens-Suffixen (wie sie z.B. beim Schreiben über den
 InfluxDB-Kompatibilitätslayer entstehen, etwa `Batterieleistung_value`).
 
-**Hinweis:** Dies ist Phase 1 dieses Adapters – **nur Schreibpfad**. Es gibt (noch) keinen
-`getHistory()`-Lesezugriff; zum Anzeigen der Daten wird direkt gegen VictoriaMetrics per PromQL
-abgefragt (z.B. mit Grafana). Der Adapter ist privat und nicht im offiziellen
-ioBroker-Repository gelistet.
+**Hinweis:** Phase 1 (Schreibpfad) ist fertig und produktiv im Einsatz. Phase 2
+(`getHistory()`-Lesezugriff, damit vis-Chart-Widgets direkt gegen diesen Adapter abfragen
+können) existiert als **Proof-of-Concept** – siehe [Lesepfad](#lesepfad-phase-2-proof-of-concept)
+unten für den aktuellen Stand und bekannte Einschränkungen. Für Visualisierung ohne vis
+(z.B. Grafana) weiterhin direkt gegen VictoriaMetrics per PromQL abfragen. Der Adapter ist
+privat und nicht im offiziellen ioBroker-Repository gelistet.
 
 ## Voraussetzungen
 
@@ -115,15 +117,34 @@ Zusätzlich wird der Puffer beim sauberen Beenden des Adapters sowie (gedrosselt
 pro Minute) nach fehlgeschlagenen Schreibversuchen persistiert, sodass auch ein harter Absturz
 (z.B. Container-Neustart) im normalen Rahmen keine Daten verliert.
 
-## Bekannte Einschränkungen (Phase 1)
+## Lesepfad (Phase 2, Proof-of-Concept)
 
-- Kein `getHistory()`-Lesezugriff – vis-Chart-Widgets können (noch) nicht direkt gegen diesen
-  Adapter abgefragt werden. Für Visualisierung z.B. Grafana direkt gegen VictoriaMetrics nutzen.
+Der Adapter beantwortet `getHistory()`-Anfragen (das, was vis-Chart-Widgets aufrufen), indem
+er rohe Datenpunkte der angefragten Metrik aus VictoriaMetrics liest (`/api/v1/export`) und sie
+an die geteilte [`@iobroker/aggregate`](https://github.com/ioBroker/aggregate)-Bibliothek
+übergibt – dieselbe Bibliothek, die `iobroker.influxdb`, `iobroker.sql` und `iobroker.history`
+für Bucket-Aggregation (Durchschnitt/Min/Max/Summe/Anzahl/Perzentil/...), Lücken-Behandlung und
+Rand-Interpolation verwenden. Dadurch funktionieren grundsätzlich alle Standard-Aggregationstypen,
+ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
+
+**Bekannte Einschränkungen des POC:**
+- Nur einzelne `id`-Anfragen (kein `id: '*'` für mehrere Datenpunkte gleichzeitig)
+- Kein serverseitiges PromQL-Pushdown (`avg_over_time` etc.) – die Aggregation läuft
+  vollständig in JS auf den rohen, unaggregierten Werten; bei sehr langen Zeiträumen mit sehr
+  vielen Rohpunkten ist das langsamer als eine native VM-Aggregation (spätere Optimierung)
+- Antworten enthalten kein `ack`/`q`/`from` – Phase 1 speichert diese Felder gar nicht erst in
+  VictoriaMetrics
+- Kein Vorab-Flush noch nicht geschriebener, gepufferter Werte vor einer Abfrage (anders als
+  `iobroker.influxdb`) – ein `getHistory()`-Aufruf direkt nach einer Zustandsänderung sieht den
+  neuesten Wert ggf. erst nach dem nächsten Schreibintervall
+
+## Sonstige bekannte Einschränkungen
+
 - Kein Multi-Cluster-Support (vminsert/vmselect) – nur ein Single-Node-Ziel.
 - Retention/Downsampling wird ausschließlich VictoriaMetrics-seitig konfiguriert
   (`-retentionPeriod`), nicht über diesen Adapter.
-- Freie, pro Datenpunkt konfigurierbare Zusatz-Labels (über `unit` hinaus) sind nicht Teil von
-  Phase 1.
+- Freie, pro Datenpunkt konfigurierbare Zusatz-Labels (über `unit` hinaus) sind nicht
+  implementiert.
 
 ## Entwicklung
 
@@ -136,6 +157,9 @@ pro Minute) nach fehlgeschlagenen Schreibversuchen persistiert, sodass auch ein 
 | `npm run dev-server` | Startet [`dev-server`](https://github.com/ioBroker/dev-server) für einen lokalen Testlauf inkl. Admin-UI |
 
 ## Changelog
+
+### 0.2.0
+* (Florian Horch) Phase 2 Proof-of-Concept: getHistory()-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek
 
 ### 0.1.0
 * (Florian Horch) Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API), Verbindungstest, Puffer/Retry, Historie-Tab-Integration

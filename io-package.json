@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "victoriametrics",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "news": {
+            "0.2.0": {
+                "en": "Phase 2 proof-of-concept: getHistory() read path via @iobroker/aggregate",
+                "de": "Phase 2 Proof-of-Concept: getHistory()-Lesepfad über @iobroker/aggregate"
+            },
             "0.1.0": {
                 "en": "Phase 1: write path to VictoriaMetrics (native JSON-lines import API)",
                 "de": "Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API)"
@@ -55,6 +59,7 @@
         "connectionType": "local",
         "dataSource": "push",
         "messagebox": true,
+        "getHistory": true,
         "adminUI": {
             "config": "json",
             "custom": "json"

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.victoriametrics",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
   "author": {
     "name": "Florian Horch",
@@ -9,7 +9,13 @@
   "contributors": [],
   "homepage": "https://github.com/seaspotter/iobroker.victoriametrics",
   "license": "MIT",
-  "keywords": ["victoriametrics", "history", "prometheus", "monitoring", "zeitreihe"],
+  "keywords": [
+    "victoriametrics",
+    "history",
+    "prometheus",
+    "monitoring",
+    "zeitreihe"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/seaspotter/iobroker.victoriametrics.git"
@@ -19,6 +25,7 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
+    "@iobroker/aggregate": "^1.0.1",
     "axios": "^1.20.0"
   },
   "devDependencies": {
