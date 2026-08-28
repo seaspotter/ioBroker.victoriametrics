@@ -1,13 +1,13 @@
 ![Logo](admin/victoriametrics.png)
 # iobroker.victoriametrics
 
-<!-- Diese Badges brauchen eine npm-Veröffentlichung bzw. Aufnahme ins offizielle
-     ioBroker-Repository/Weblate und funktionieren daher noch nicht - sobald einer dieser
-     Schritte passiert, hier einkommentieren:
-![Number of Installations](https://iobroker.live/badges/victoriametrics-installed.svg)
-![Number of Installations](https://iobroker.live/badges/victoriametrics-stable.svg)
 [![NPM version](https://img.shields.io/npm/v/iobroker.victoriametrics.svg)](https://www.npmjs.com/package/iobroker.victoriametrics)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.victoriametrics.svg)](https://www.npmjs.com/package/iobroker.victoriametrics)
+<!-- Diese Badges brauchen Aufnahme ins offizielle ioBroker-Repository bzw. Weblate und
+     funktionieren daher noch nicht - sobald einer dieser Schritte passiert, hier
+     einkommentieren:
+![Number of Installations](https://iobroker.live/badges/victoriametrics-installed.svg)
+![Number of Installations](https://iobroker.live/badges/victoriametrics-stable.svg)
 [![Translation status](https://weblate.iobroker.net/widgets/adapters/-/victoriametrics/svg-badge.svg)](https://weblate.iobroker.net/engage/adapters/?utm_source=widget)
 -->
 ![Test and Release](https://github.com/seaspotter/iobroker.victoriametrics/workflows/Test%20and%20Release/badge.svg)
