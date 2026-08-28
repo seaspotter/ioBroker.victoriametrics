@@ -1,0 +1,58 @@
+{
+  "name": "iobroker.victoriametrics",
+  "version": "0.1.0",
+  "description": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+  "author": {
+    "name": "Florian Horch",
+    "email": "florian.horch@gmail.com"
+  },
+  "contributors": [],
+  "homepage": "https://github.com/seaspotter/iobroker.victoriametrics",
+  "license": "MIT",
+  "keywords": "victoriametrics,history,prometheus,monitoring,zeitreihe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seaspotter/iobroker.victoriametrics.git"
+  },
+  "engines": {
+    "node": ">= 20"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.4.3",
+    "axios": "^1.20.0"
+  },
+  "devDependencies": {
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/dev-server": "^0.8.0",
+    "@iobroker/eslint-config": "^2.3.4",
+    "@iobroker/testing": "^5.3.0",
+    "@tsconfig/node20": "^20.1.10",
+    "@types/iobroker": "npm:@iobroker/types@^7.2.2",
+    "@types/node": "^20.19.43",
+    "typescript": "~5.9.3"
+  },
+  "main": "main.js",
+  "files": [
+    "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).{json,json5}",
+    "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
+    "lib/",
+    "www/",
+    "io-package.json",
+    "LICENSE",
+    "main.js"
+  ],
+  "scripts": {
+    "test:js": "mocha --config test/mocharc.custom.json \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
+    "test:package": "mocha test/package --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test": "npm run test:js && npm run test:package",
+    "check": "tsc --noEmit -p tsconfig.check.json",
+    "lint": "eslint -c eslint.config.mjs .",
+    "translate": "translate-adapter",
+    "dev-server": "dev-server"
+  },
+  "bugs": {
+    "url": "https://github.com/seaspotter/iobroker.victoriametrics/issues"
+  },
+  "readmeFilename": "README.md"
+}

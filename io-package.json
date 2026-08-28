@@ -1,0 +1,111 @@
+{
+    "common": {
+        "name": "victoriametrics",
+        "version": "0.1.0",
+        "news": {
+            "0.1.0": {
+                "en": "Phase 1: write path to VictoriaMetrics (native JSON-lines import API)",
+                "de": "Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API)"
+            }
+        },
+        "titleLang": {
+            "en": "VictoriaMetrics",
+            "de": "VictoriaMetrics",
+            "ru": "ВикторияМетрикс",
+            "pt": "VictoriaMetrics",
+            "nl": "VictoriaMetrics",
+            "fr": "VictoriaMetrics",
+            "it": "VictoriaMetrics",
+            "es": "VictoriaMétricas",
+            "pl": "VictoriaMetrics",
+            "uk": "ВікторіяМетрикс",
+            "zh-cn": "维多利亚指标"
+        },
+        "desc": {
+            "en": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+            "de": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+            "ru": "Schreibt ioBroker-Datenpunkt-Historie nativ в VictoriaMetrics",
+            "pt": "Schreibt ioBroker-Datenpunkt-Historie nativ em VictoriaMetrics",
+            "nl": "Schreibt ioBroker-Datenpunkt-Geschiedenis native in VictoriaMetrics",
+            "fr": "Schreibt ioBroker-Datenpunkt-Historie nativ dans VictoriaMetrics",
+            "it": "Schreibt ioBroker-Datenpunkt-Historie native in VictoriaMetrics",
+            "es": "Schreibt ioBroker-Datenpunkt-Historie nativ en VictoriaMetrics",
+            "pl": "Schreibt ioBroker-Datenpunkt-Historie natywnie w VictoriaMetrics",
+            "uk": "Schreibt ioBroker-Datenpunkt-Historie nativ у VictoriaMetrics",
+            "zh-cn": "VictoriaMetrics 中的 Schreibt ioBroker-Datanpunkt-Historie nativ"
+        },
+        "authors": [
+            "Florian Horch <florian.horch@gmail.com>"
+        ],
+        "keywords": "victoriametrics,history,prometheus,monitoring,zeitreihe",
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
+        "platform": "Javascript/Node.js",
+        "icon": "victoriametrics.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/seaspotter/iobroker.victoriametrics/main/admin/victoriametrics.png",
+        "readme": "https://github.com/seaspotter/iobroker.victoriametrics/blob/main/README.md",
+        "loglevel": "info",
+        "tier": 3,
+        "mode": "daemon",
+        "type": "storage",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "push",
+        "messagebox": true,
+        "adminUI": {
+            "config": "json",
+            "custom": "json"
+        },
+        "supportCustoms": true,
+        "encryptedNative": ["password"],
+        "protectedNative": ["password"],
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.0.23"
+            }
+        ]
+    },
+    "native": {
+        "protocol": "http",
+        "host": "",
+        "port": 8428,
+        "useAuth": false,
+        "username": "",
+        "password": "",
+        "requestTimeout": 5000,
+        "writeInterval": 10,
+        "bufferMaxSize": 1000
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Device or service connected",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
+}

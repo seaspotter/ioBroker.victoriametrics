@@ -1,0 +1,21 @@
+{
+    "Verbindung": "Verbindung",
+    "Schreibverhalten": "Schreibverhalten",
+    "Protokoll": "Protokoll",
+    "Host / IP-Adresse": "Host / IP-Adresse",
+    "Hostname oder IP-Adresse der VictoriaMetrics-Instanz, ohne Protokoll": "Hostname oder IP-Adresse der VictoriaMetrics-Instanz, ohne Protokoll",
+    "Port": "Port",
+    "Basic-Auth verwenden": "Basic-Auth verwenden",
+    "Benutzername": "Benutzername",
+    "Passwort": "Passwort",
+    "Timeout (ms)": "Timeout (ms)",
+    "Verbindung testen": "Verbindung testen",
+    "Zeitüberschreitung bei der Verbindung": "Zeitüberschreitung bei der Verbindung",
+    "Schreibintervall (Sekunden)": "Schreibintervall (Sekunden)",
+    "Wie oft gepufferte Werte gesammelt an VictoriaMetrics gesendet werden": "Wie oft gepufferte Werte gesammelt an VictoriaMetrics gesendet werden",
+    "Max. Puffergröße (Punkte)": "Max. Puffergröße (Punkte)",
+    "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall": "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall",
+    "In VictoriaMetrics historisieren": "In VictoriaMetrics historisieren",
+    "Metrik-Name (optional)": "Metrik-Name (optional)",
+    "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung."
+}

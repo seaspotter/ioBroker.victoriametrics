@@ -1,0 +1,16 @@
+// Specialized tsconfig for type-checking js files
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": ["node", "mocha", "chai"]
+    },
+    "include": [
+        "**/*.js",
+        "**/*.d.ts"
+    ],
+    "exclude": [
+        "**/build",
+        "node_modules/",
+        "widgets/"
+    ]
+}

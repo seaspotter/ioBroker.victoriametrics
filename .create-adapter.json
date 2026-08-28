@@ -1,0 +1,42 @@
+{
+    "adapterName": "victoriametrics",
+    "title": "VictoriaMetrics",
+    "description": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+    "keywords": "victoriametrics,history,prometheus,monitoring,zeitreihe",
+    "contributors": "",
+    "expert": "yes",
+    "features": [
+        "adapter"
+    ],
+    "adminFeatures": [
+        "custom"
+    ],
+    "type": "storage",
+    "startMode": "daemon",
+    "connectionType": "local",
+    "dataSource": "push",
+    "connectionIndicator": "yes",
+    "language": "JavaScript",
+    "nodeVersion": "20",
+    "adminUi": "json",
+    "tools": [
+        "ESLint",
+        "type checking"
+    ],
+    "eslintConfig": "official",
+    "releaseScript": "no",
+    "devServer": "local",
+    "devServerPort": 8081,
+    "indentation": "Space (4)",
+    "quotes": "single",
+    "authorName": "Florian Horch",
+    "authorGithub": "seaspotter",
+    "authorEmail": "florian.horch@gmail.com",
+    "gitRemoteProtocol": "HTTPS",
+    "gitCommit": "no",
+    "defaultBranch": "main",
+    "license": "MIT License",
+    "dependabot": "no",
+    "replay": "/tmp/claude-1000/-home-seaspotter-github-iobroker-victoriametrics/034f9023-0183-45c9-be49-a864ea347593/scratchpad/create-adapter-answers.json",
+    "creatorVersion": "3.1.5"
+}

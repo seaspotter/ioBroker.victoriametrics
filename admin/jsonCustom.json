@@ -1,0 +1,18 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "enabled": {
+            "type": "checkbox",
+            "label": "In VictoriaMetrics historisieren",
+            "newLine": true
+        },
+        "aliasId": {
+            "type": "text",
+            "label": "Metrik-Name (optional)",
+            "help": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.",
+            "hidden": "!data.enabled",
+            "newLine": true
+        }
+    }
+}
