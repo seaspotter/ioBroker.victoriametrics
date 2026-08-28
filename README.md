@@ -1,9 +1,16 @@
 ![Logo](admin/victoriametrics.png)
 # iobroker.victoriametrics
 
+<!-- Diese Badges brauchen eine npm-Veröffentlichung bzw. Aufnahme ins offizielle
+     ioBroker-Repository/Weblate und funktionieren daher noch nicht - sobald einer dieser
+     Schritte passiert, hier einkommentieren:
+![Number of Installations](https://iobroker.live/badges/victoriametrics-installed.svg)
+![Number of Installations](https://iobroker.live/badges/victoriametrics-stable.svg)
 [![NPM version](https://img.shields.io/npm/v/iobroker.victoriametrics.svg)](https://www.npmjs.com/package/iobroker.victoriametrics)
-
-**Tests:** ![Test and Release](https://github.com/seaspotter/iobroker.victoriametrics/workflows/Test%20and%20Release/badge.svg)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.victoriametrics.svg)](https://www.npmjs.com/package/iobroker.victoriametrics)
+[![Translation status](https://weblate.iobroker.net/widgets/adapters/-/victoriametrics/svg-badge.svg)](https://weblate.iobroker.net/engage/adapters/?utm_source=widget)
+-->
+![Test and Release](https://github.com/seaspotter/iobroker.victoriametrics/workflows/Test%20and%20Release/badge.svg)
 
 Schreibt ioBroker-Datenpunkt-Historie nativ in [VictoriaMetrics](https://victoriametrics.com/) – über
 dessen [JSON-Lines-Import-API](https://docs.victoriametrics.com/#how-to-import-data-in-json-line-format),
@@ -15,14 +22,52 @@ InfluxDB-Kompatibilitätslayer entstehen, etwa `Batterieleistung_value`).
 können) existiert als **Proof-of-Concept** – siehe [Lesepfad](#lesepfad-phase-2-proof-of-concept)
 unten für den aktuellen Stand und bekannte Einschränkungen. Für Visualisierung ohne vis
 (z.B. Grafana) weiterhin direkt gegen VictoriaMetrics per PromQL abfragen. Der Adapter ist
-privat und nicht im offiziellen ioBroker-Repository gelistet.
+privat und (noch) nicht im offiziellen ioBroker-Repository gelistet.
 
 ## Voraussetzungen
 
-- Eine laufende VictoriaMetrics-Instanz (Single-Node), erreichbar per HTTP(S)
+- Eine laufende VictoriaMetrics-Instanz (Single-Node), erreichbar per HTTP(S) – siehe
+  [Installation von VictoriaMetrics](#installation-von-victoriametrics) unten
 - ioBroker js-controller >= 6.0.11, Admin >= 7.0.23
 
-## Installation
+## Installation von VictoriaMetrics
+
+VictoriaMetrics läuft als einzelne, eigenständige Binary/Docker-Image – kein separater
+Datenbank-Server-Setup wie bei InfluxDB nötig. Offizielle Installationsanleitungen für alle
+Plattformen (Linux-Binary, Docker, Kubernetes-Helm-Chart, …): siehe
+[VictoriaMetrics-Dokumentation](https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/).
+
+### Per Docker
+
+```bash
+docker run -d --name victoriametrics \
+  -p 8428:8428 \
+  -v victoria-metrics-data:/victoria-metrics-data \
+  victoriametrics/victoria-metrics:latest \
+  --storageDataPath=/victoria-metrics-data \
+  --retentionPeriod=100y
+```
+
+Danach ist VictoriaMetrics unter `http://<Docker-Host>:8428` erreichbar (Health-Check:
+`http://<Docker-Host>:8428/health`, VMUI: `http://<Docker-Host>:8428/vmui/`). Offizielles
+Docker-Image: [victoriametrics/victoria-metrics auf Docker Hub](https://hub.docker.com/r/victoriametrics/victoria-metrics/).
+Für dauerhaften Betrieb empfiehlt sich ein Volume/Bind-Mount für `-storageDataPath` (siehe
+oben) sowie – je nach Umgebung – ein `docker-compose.yml` mit `restart: unless-stopped`.
+
+### Ohne Docker
+
+Statisch gelinktes Binary für die jeweilige Plattform von der
+[GitHub-Releases-Seite](https://github.com/VictoriaMetrics/VictoriaMetrics/releases) laden,
+entpacken und starten:
+
+```bash
+./victoria-metrics-prod --storageDataPath=/path/to/data --retentionPeriod=100y
+```
+
+Ausführliche Installationsanleitungen (inkl. systemd-Service, Kubernetes, Cluster-Setup) in der
+[offiziellen Dokumentation](https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#how-to-start-victoriametrics).
+
+## Installation des Adapters
 
 Da der Adapter privat ist (nicht im offiziellen Repository), erfolgt die Installation über die
 GitHub-URL, entweder in der Admin-Oberfläche unter "Adapter" → "Custom von URL installieren..."
@@ -156,21 +201,106 @@ ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
   `iobroker.influxdb`) – ein `getHistory()`-Aufruf direkt nach einer Zustandsänderung sieht den
   neuesten Wert ggf. erst nach dem nächsten Schreibintervall
 
+### Zugriff aus dem JavaScript-Adapter
+
+```javascript
+// Letzte 50 Rohwerte
+sendTo('victoriametrics.0', 'getHistory', {
+    id: 'javascript.0.PV_Batterieleistung',
+    options: {
+        end: Date.now(),
+        count: 50,
+        aggregate: 'onchange',
+    }
+}, function (result) {
+    for (var i = 0; i < result.result.length; i++) {
+        console.log(result.result[i].ts + ' ' + result.result[i].val);
+    }
+});
+
+// Stundenmittelwert der letzten 24h
+var end = Date.now();
+sendTo('victoriametrics.0', 'getHistory', {
+    id: 'javascript.0.PV_Batterieleistung',
+    options: {
+        start: end - 24 * 3600000,
+        end: end,
+        aggregate: 'average',
+        step: 3600000,
+    }
+}, function (result) {
+    console.log(JSON.stringify(result.result));
+});
+```
+
+Unterstützte `options`-Felder und `aggregate`-Werte entsprechen dem ioBroker-Standard (siehe
+[`iobroker.history`-Dokumentation](https://github.com/ioBroker/ioBroker.history#access-values-from-javascript-adapter)
+für die vollständige Referenz) – mit den oben genannten Einschränkungen dieses POC.
+
 ## Datenmanagement / Skript-Schnittstellen
 
 Der Adapter beantwortet zusätzlich drei weitere ioBroker-Message-Kommandos (`sendTo`), z.B. für
 Skripte oder Migrationswerkzeuge:
 
-- **`features`** – Capability-Discovery, antwortet `{supportedFeatures: ['storeState', 'deleteAll']}`.
-- **`storeState`** – schreibt einen oder mehrere historische Punkte, z.B. um alte Historie aus
-  einer anderen Quelle (z.B. InfluxDB) nachträglich zu importieren. Nachricht:
-  `{id, state: {val, ts}, rules?}` (auch als Array/Batch). `rules: true` wendet Rundung und
-  Schwellenwert-/Nullwert-Filter an; Entprellzeit/Blockzeit/Minimale Änderung werden **immer**
-  ignoriert, da diese auf Live-Zustandsänderungen ausgelegt sind und für rückdatierte
-  Bulk-Importe keinen Sinn ergeben. Erfordert nicht, dass der Datenpunkt aktuell für
-  Live-Historisierung aktiviert ist.
-- **`deleteAll`** – löscht die komplette in VictoriaMetrics gespeicherte Historie eines
-  Datenpunkts. Nachricht: `{id}` (auch als Array).
+### features
+
+Capability-Discovery:
+
+```javascript
+sendTo('victoriametrics.0', 'features', {}, function (result) {
+    console.log(JSON.stringify(result.supportedFeatures)); // ['storeState', 'deleteAll']
+});
+```
+
+### storeState
+
+Schreibt einen oder mehrere historische Punkte, z.B. um alte Historie aus einer anderen Quelle
+(z.B. InfluxDB) nachträglich zu importieren:
+
+```javascript
+sendTo('victoriametrics.0', 'storeState', {
+    id: 'javascript.0.PV_Batterieleistung',
+    state: { ts: 1690000000000, val: 512.3 },
+    rules: true, // Rundung + Schwellenwert-/Nullwert-Filter anwenden (siehe unten)
+}, result => console.log(JSON.stringify(result)));
+
+// auch als Batch für dieselbe id:
+sendTo('victoriametrics.0', 'storeState', {
+    id: 'javascript.0.PV_Batterieleistung',
+    state: [
+        { ts: 1690000000000, val: 512.3 },
+        { ts: 1690000060000, val: 498.1 },
+    ],
+}, result => console.log(JSON.stringify(result)));
+
+// oder als Array mehrerer ids:
+sendTo('victoriametrics.0', 'storeState', [
+    { id: 'javascript.0.a', state: { ts: 1690000000000, val: 1 } },
+    { id: 'javascript.0.b', state: { ts: 1690000000000, val: 2 } },
+], result => console.log(JSON.stringify(result)));
+```
+
+`rules: true` wendet Rundung und Schwellenwert-/Nullwert-Filter an (Werte-Validität, sinnvoll
+auch für Importe); Entprellzeit/Blockzeit/Minimale Änderung werden **immer** ignoriert, da diese
+auf Live-Zustandsänderungen ausgelegt sind und für rückdatierte Bulk-Importe keinen Sinn ergeben.
+Erfordert nicht, dass der Datenpunkt aktuell für Live-Historisierung aktiviert ist. Bei
+Teilfehlern liefert die Antwort `{error, errors: [...], successCount}`, bei vollem Erfolg
+`{success: true, successCount}`.
+
+### deleteAll
+
+Löscht die komplette in VictoriaMetrics gespeicherte Historie eines Datenpunkts:
+
+```javascript
+sendTo('victoriametrics.0', 'deleteAll', { id: 'javascript.0.PV_Batterieleistung' },
+    result => console.log(JSON.stringify(result)));
+
+// auch als Array mehrerer ids:
+sendTo('victoriametrics.0', 'deleteAll', [
+    { id: 'javascript.0.a' },
+    { id: 'javascript.0.b' },
+], result => console.log(JSON.stringify(result)));
+```
 
 **Bewusst nicht implementiert:** `delete`/`deleteRange`/`update` (Einzelpunkt-Löschung/-Bearbeitung,
 wie es das influxdb-Admin-UI per Klick auf einen Chart-Punkt anbietet). VictoriaMetrics kann
@@ -184,8 +314,21 @@ das wäre überraschend und gefährlich, deshalb absichtlich weggelassen.
 VictoriaMetrics' Retention ist ein **serverseitiges Start-Flag** (`-retentionPeriod`) des
 VM-Prozesses selbst, nicht per HTTP-API zur Laufzeit änderbar (anders als z.B. InfluxDB, wo der
 Adapter per `ALTER RETENTION POLICY` aktiv einen Wert setzen kann). Dieser Adapter zeigt die
-aktuell konfigurierte Retention deshalb nur lesend im Log an (siehe oben) – zum Ändern muss VM
-mit einem anderen `-retentionPeriod`-Wert neu gestartet werden.
+aktuell konfigurierte Retention deshalb nur lesend im Log an (siehe oben, `/flags`-Endpunkt) –
+zum Ändern muss VM mit einem anderen `-retentionPeriod`-Wert neu gestartet werden (bei Docker:
+den `--retentionPeriod=...`-Parameter im `docker run`/`docker-compose.yml` ändern und den
+Container neu erstellen).
+
+**Details:**
+- **Standard-Retention**, falls `-retentionPeriod` nicht gesetzt ist: **1 Monat (31 Tage)**.
+- **Minimum**: 24h/1 Tag. VictoriaMetrics unterstützt keine "unbegrenzte" Retention im engeren
+  Sinne, aber beliebig hohe Werte sind möglich, z.B. `-retentionPeriod=100y`.
+- Daten werden **pro Monats-Partition** gelöscht, jeweils am ersten Tag des neuen Monats – nicht
+  sofort beim Erreichen der Grenze. Der maximale Plattenplatzverbrauch liegt daher bei
+  `retentionPeriod + 1 Monat`.
+- Eine bestehende Retention kann jederzeit **verlängert** werden, ohne Daten zu verlieren. Wird
+  sie **verkürzt**, werden Daten außerhalb der neuen Grenze beim nächsten Monatswechsel gelöscht.
+- Ausführliche Details: [VictoriaMetrics-Dokumentation, Abschnitt "Retention"](https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention).
 
 ## Sonstige bekannte Einschränkungen
 
@@ -205,19 +348,28 @@ mit einem anderen `-retentionPeriod`-Wert neu gestartet werden.
 
 ## Changelog
 
-### 0.3.0
-* (Florian Horch) VMUI-Sidebar-Link, instanzweite Standardwerte für die Historie-Filter, Retention-Anzeige (read-only), storeState/deleteAll/features-Messages für Skripte/Migration
+<!--
+	Platzhalter für die nächste Version (am Zeilenanfang):
+	### **WORK IN PROGRESS**
+-->
 
-### 0.2.0
-* (Florian Horch) Phase 2 Proof-of-Concept: getHistory()-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek
+### 0.3.0 (2026-08-28)
+* (SeaSpotter) VMUI-Sidebar-Link in der Admin-Seitenleiste (`common.adminTab`, analog Node-RED/Zigbee2MQTT)
+* (SeaSpotter) Instanzweite Standardwerte für alle Historie-Filter (round/changesMinDelta/debounceTime/blockTime/ignoreBelow-/AboveNumber/ignoreZero) – Datenpunkt-eigene Werte überschreiben weiterhin den Standard
+* (SeaSpotter) Retention wird beim Start read-only geloggt (`/flags`-Endpunkt)
+* (SeaSpotter) Neue Message-Kommandos `storeState` (Bulk-Import/Migration), `deleteAll` (Historie eines Datenpunkts löschen) und `features` (Capability-Discovery)
+* (SeaSpotter) `round`, `changesMinDelta`, `debounceTime`, `blockTime`, `ignoreBelowNumber`/`ignoreAboveNumber`, `ignoreZero` als Pro-Datenpunkt-Filter ergänzt
 
-### 0.1.0
-* (Florian Horch) Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API), Verbindungstest, Puffer/Retry, Historie-Tab-Integration
+### 0.2.0 (2026-08-28)
+* (SeaSpotter) Phase 2 Proof-of-Concept: `getHistory()`-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek
+
+### 0.1.0 (2026-08-28)
+* (SeaSpotter) Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API), Verbindungstest, Puffer/Retry, Historie-Tab-Integration
 
 ## License
 MIT License
 
-Copyright (c) 2026 Florian Horch <florian.horch@gmail.com>
+Copyright (c) 2026 SeaSpotter <seatowage@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

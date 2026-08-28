@@ -43,7 +43,7 @@
             "zh-cn": "VictoriaMetrics 中的 Schreibt ioBroker-Datanpunkt-Historie nativ"
         },
         "authors": [
-            "Florian Horch <florian.horch@gmail.com>"
+            "SeaSpotter <seatowage@gmail.com>"
         ],
         "keywords": ["victoriametrics", "history", "prometheus", "monitoring", "zeitreihe"],
         "licenseInformation": {
