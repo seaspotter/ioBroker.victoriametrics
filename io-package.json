@@ -1,8 +1,21 @@
 {
     "common": {
         "name": "victoriametrics",
-        "version": "0.4.0",
+        "version": "0.4.1",
         "news": {
+            "0.4.1": {
+                "en": "English README, German docs/de split, adapter-checker compliance fixes",
+                "de": "Englisches README, deutsche docs/de-Aufteilung, Adapter-Checker-Korrekturen",
+                "ru": "Английский README, немецкая документация/разделение, исправления соответствия адаптера",
+                "pt": "README em inglês, documentos/de split em alemão, correções de conformidade do verificador de adaptador",
+                "nl": "Engelse README, Duitse docs/de split, conformiteitsoplossingen voor adapter-checker",
+                "fr": "README anglais, documents allemands/de split, correctifs de conformité du vérificateur d'adaptateur",
+                "it": "README inglese, divisione docs/de tedesco, correzioni di conformità del controllo dell'adattatore",
+                "es": "README en inglés, documentos alemanes/de split, correcciones de cumplimiento del verificador de adaptadores",
+                "pl": "Plik README w języku angielskim, dokumentacja w języku niemieckim/de split, poprawki dotyczące zgodności modułu sprawdzania adapterów",
+                "uk": "Англійська README, німецька docs/de split, виправлення відповідності адаптера",
+                "zh-cn": "英语自述文件、德语文档/de split、适配器检查器合规性修复"
+            },
             "0.4.0": {
                 "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
                 "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon",

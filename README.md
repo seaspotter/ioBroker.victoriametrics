@@ -369,6 +369,8 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
+### **WORK IN PROGRESS**
+
 ### 0.4.1 (2026-08-28)
 * (SeaSpotter) README is now the canonical English documentation (required for official repo submission); full German documentation moved to `docs/de/victoriametrics.md`
 * (SeaSpotter) GitHub repository renamed to `ioBroker.victoriametrics` (capital B) to match convention
