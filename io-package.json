@@ -5,19 +5,55 @@
         "news": {
             "0.4.0": {
                 "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
-                "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon"
+                "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon",
+                "ru": "Продвижение PromQL на стороне сервера, getHistory с несколькими идентификаторами,changeOnly/changesRelogInterval, проверка сохранения соединения, новый значок",
+                "pt": "Pushdown do lado do servidor PromQL, getHistory multi-id, changeOnly/changesRelogInterval, retenção no teste de conexão, novo ícone",
+                "nl": "PromQL pushdown op de server, multi-id getHistory, changeOnly/changesRelogInterval, retentie in verbindingstest, nieuw pictogram",
+                "fr": "Refoulement côté serveur PromQL, getHistory multi-id, changesOnly/changesRelogInterval, rétention dans le test de connexion, nouvelle icône",
+                "it": "Pushdown lato server PromQL, getHistory multi-id, changeOnly/changesRelogInterval, mantenimento nel test di connessione, nuova icona",
+                "es": "Pushdown del lado del servidor PromQL, getHistory de múltiples ID, cambiosOnly/changesRelogInterval, prueba de retención en la conexión, nuevo icono",
+                "pl": "PromQL pushdown po stronie serwera, getHistory z wieloma identyfikatorami, zmianyOnly/changesRelogInterval, test zachowania połączenia, nowa ikona",
+                "uk": "PromQL на стороні сервера, що повертається, getHistory з декількома ідентифікаторами, changesOnly/changesRelogInterval, утримання під час перевірки з’єднання, новий значок",
+                "zh-cn": "PromQL 服务器端下推、多 id getHistory、changesOnly/changesRelogInterval、连接测试中的保留、新图标"
             },
             "0.3.0": {
                 "en": "VMUI sidebar link, instance-wide defaults, storeState/deleteAll/features messages, retention display",
-                "de": "VMUI-Sidebar-Link, instanzweite Standardwerte, storeState/deleteAll/features-Nachrichten, Retention-Anzeige"
+                "de": "VMUI-Sidebar-Link, instanzweite Standardwerte, storeState/deleteAll/features-Nachrichten, Retention-Anzeige",
+                "ru": "Ссылка на боковую панель VMUI, настройки по умолчанию для всего экземпляра, сообщения storeState/deleteAll/features, отображение сохранения",
+                "pt": "Link da barra lateral VMUI, padrões para toda a instância, mensagens storeState/deleteAll/features, exibição de retenção",
+                "nl": "VMUI-zijbalklink, standaardinstellingen voor het hele exemplaar, storeState/deleteAll/features-berichten, retentieweergave",
+                "fr": "Lien de la barre latérale VMUI, valeurs par défaut à l'échelle de l'instance, messages storeState/deleteAll/features, affichage de la rétention",
+                "it": "Collegamento alla barra laterale VMUI, impostazioni predefinite a livello di istanza, messaggi storeState/deleteAll/features, visualizzazione della conservazione",
+                "es": "Enlace de la barra lateral de VMUI, valores predeterminados para toda la instancia, mensajes storeState/deleteAll/features, visualización de retención",
+                "pl": "Link do paska bocznego VMUI, ustawienia domyślne dla całej instancji, komunikaty o stanie sklepu/usuwaniu wszystkich/funkcjach, wyświetlanie przechowywania",
+                "uk": "Посилання на бічній панелі VMUI, параметри за замовчуванням для всього екземпляра, повідомлення storeState/deleteAll/features, відображення збереження",
+                "zh-cn": "VMUI 侧边栏链接、实例范围默认值、storeState/deleteAll/features 消息、保留显示"
             },
             "0.2.0": {
                 "en": "Phase 2 proof-of-concept: getHistory() read path via @iobroker/aggregate",
-                "de": "Phase 2 Proof-of-Concept: getHistory()-Lesepfad über @iobroker/aggregate"
+                "de": "Phase 2 Proof-of-Concept: getHistory()-Lesepfad über @iobroker/aggregate",
+                "ru": "Проверка концепции, этап 2: путь чтения getHistory() через @iobroker/aggregate",
+                "pt": "Prova de conceito da fase 2: caminho de leitura getHistory() via @iobroker/agregado",
+                "nl": "Fase 2 proof-of-concept: getHistory() leespad via @iobroker/aggregate",
+                "fr": "Preuve de concept de phase 2 : chemin de lecture getHistory() via @iobroker/aggregate",
+                "it": "Prova di concetto di fase 2: percorso di lettura getHistory() tramite @iobroker/aggregate",
+                "es": "Prueba de concepto de fase 2: ruta de lectura getHistory() a través de @iobroker/aggregate",
+                "pl": "Faza 2 weryfikacji koncepcji: ścieżka odczytu getHistory() za pośrednictwem @iobroker/aggregate",
+                "uk": "Фаза 2 підтвердження концепції: шлях читання getHistory() через @iobroker/aggregate",
+                "zh-cn": "第 2 阶段概念验证：getHistory() 通过 @iobroker/aggregate 读取路径"
             },
             "0.1.0": {
                 "en": "Phase 1: write path to VictoriaMetrics (native JSON-lines import API)",
-                "de": "Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API)"
+                "de": "Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API)",
+                "ru": "Этап 1: запись пути к VictoriaMetrics (собственный API импорта строк JSON)",
+                "pt": "Fase 1: escrever caminho para VictoriaMetrics (API nativa de importação de linhas JSON)",
+                "nl": "Fase 1: schrijfpad naar VictoriaMetrics (native JSON-lijnen import API)",
+                "fr": "Phase 1 : écrire le chemin vers VictoriaMetrics (API d'importation de lignes JSON natives)",
+                "it": "Fase 1: scrivere il percorso di VictoriaMetrics (API di importazione di linee JSON native)",
+                "es": "Fase 1: escribir la ruta a VictoriaMetrics (API de importación de líneas JSON nativas)",
+                "pl": "Faza 1: zapisz ścieżkę do VictoriaMetrics (natywny interfejs API importu linii JSON)",
+                "uk": "Фаза 1: шлях запису до VictoriaMetrics (власний API імпорту JSON-рядків)",
+                "zh-cn": "第 1 阶段：写入 VictoriaMetrics 的路径（原生 JSON 行导入 API）"
             }
         },
         "titleLang": {
@@ -34,22 +70,28 @@
             "zh-cn": "维多利亚指标"
         },
         "desc": {
-            "en": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+            "en": "Writes ioBroker datapoint history natively to VictoriaMetrics",
             "de": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
-            "ru": "Schreibt ioBroker-Datenpunkt-Historie nativ в VictoriaMetrics",
-            "pt": "Schreibt ioBroker-Datenpunkt-Historie nativ em VictoriaMetrics",
-            "nl": "Schreibt ioBroker-Datenpunkt-Geschiedenis native in VictoriaMetrics",
-            "fr": "Schreibt ioBroker-Datenpunkt-Historie nativ dans VictoriaMetrics",
-            "it": "Schreibt ioBroker-Datenpunkt-Historie native in VictoriaMetrics",
-            "es": "Schreibt ioBroker-Datenpunkt-Historie nativ en VictoriaMetrics",
-            "pl": "Schreibt ioBroker-Datenpunkt-Historie natywnie w VictoriaMetrics",
-            "uk": "Schreibt ioBroker-Datenpunkt-Historie nativ у VictoriaMetrics",
-            "zh-cn": "VictoriaMetrics 中的 Schreibt ioBroker-Datanpunkt-Historie nativ"
+            "ru": "Записывает историю точек данных ioBroker нативно в VictoriaMetrics",
+            "pt": "Grava o histórico de pontos de dados do ioBroker nativamente no VictoriaMetrics",
+            "nl": "Schrijft ioBroker-datapuntgeschiedenis native naar VictoriaMetrics",
+            "fr": "Écrit nativement l'historique des points de données ioBroker dans VictoriaMetrics",
+            "it": "Scrive nativamente la cronologia dei punti dati ioBroker in VictoriaMetrics",
+            "es": "Escribe el historial de puntos de datos de ioBroker de forma nativa en VictoriaMetrics",
+            "pl": "Natywnie zapisuje historię punktów danych ioBroker w VictoriaMetrics",
+            "uk": "Записує історію точок даних ioBroker нативно у VictoriaMetrics",
+            "zh-cn": "将 ioBroker 数据点历史原生写入 VictoriaMetrics"
         },
         "authors": [
             "SeaSpotter <seatowage@gmail.com>"
         ],
-        "keywords": ["victoriametrics", "history", "prometheus", "monitoring", "zeitreihe"],
+        "keywords": [
+            "victoriametrics",
+            "history",
+            "prometheus",
+            "monitoring",
+            "zeitreihe"
+        ],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
@@ -81,8 +123,12 @@
             "singleton": true
         },
         "supportCustoms": true,
-        "encryptedNative": ["password"],
-        "protectedNative": ["password"],
+        "encryptedNative": [
+            "password"
+        ],
+        "protectedNative": [
+            "password"
+        ],
         "dependencies": [
             {
                 "js-controller": ">=6.0.11"
