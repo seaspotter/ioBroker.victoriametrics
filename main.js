@@ -159,13 +159,9 @@ class Victoriametrics extends utils.Adapter {
             labels.unit = metricName.sanitizeLabelValue(common.unit);
         }
 
-        this.buffer.add({
-            pointId: id,
-            metricName: metricName.deriveMetricName(id, settings, this.log),
-            labels,
-            value,
-            ts: state.ts,
-        });
+        const name = metricName.deriveMetricName(id, settings, this.log);
+        this.buffer.add({ pointId: id, metricName: name, labels, value, ts: state.ts });
+        this.log.debug(`Gepuffert: ${id} -> ${name}=${value} (${JSON.stringify(labels)})`);
 
         if (this.buffer.size() >= this.config.bufferMaxSize) {
             this.flush();
@@ -222,6 +218,7 @@ class Victoriametrics extends utils.Adapter {
             for (const point of points) {
                 this.errorPoints[point.pointId] = 0;
             }
+            this.log.debug(`${points.length} Punkt(e) erfolgreich nach VictoriaMetrics geschrieben`);
             await this.setState('info.connection', true, true);
         } else {
             this.log.warn(
