@@ -7,7 +7,7 @@
     "email": "seatowage@gmail.com"
   },
   "contributors": [],
-  "homepage": "https://github.com/seaspotter/iobroker.victoriametrics",
+  "homepage": "https://github.com/seaspotter/ioBroker.victoriametrics",
   "license": "MIT",
   "keywords": [
     "victoriametrics",
@@ -18,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seaspotter/iobroker.victoriametrics.git"
+    "url": "git+https://github.com/seaspotter/ioBroker.victoriametrics.git"
   },
   "engines": {
     "node": ">= 20"
@@ -64,7 +64,7 @@
     "release": "release-script"
   },
   "bugs": {
-    "url": "https://github.com/seaspotter/iobroker.victoriametrics/issues"
+    "url": "https://github.com/seaspotter/ioBroker.victoriametrics/issues"
   },
   "readmeFilename": "README.md"
 }

@@ -1,6 +1,7 @@
 {
     "common": {
         "name": "victoriametrics",
+        "title": "VictoriaMetrics",
         "version": "0.4.0",
         "news": {
             "0.4.0": {
@@ -99,8 +100,8 @@
         "platform": "Javascript/Node.js",
         "icon": "victoriametrics.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/seaspotter/iobroker.victoriametrics/main/admin/victoriametrics.png",
-        "readme": "https://github.com/seaspotter/iobroker.victoriametrics/blob/main/README.md",
+        "extIcon": "https://raw.githubusercontent.com/seaspotter/ioBroker.victoriametrics/main/admin/victoriametrics.png",
+        "readme": "https://github.com/seaspotter/ioBroker.victoriametrics/blob/main/README.md",
         "loglevel": "info",
         "tier": 3,
         "mode": "daemon",

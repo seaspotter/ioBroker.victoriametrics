@@ -10,7 +10,7 @@
 ![Number of Installations](https://iobroker.live/badges/victoriametrics-stable.svg)
 [![Translation status](https://weblate.iobroker.net/widgets/adapters/-/victoriametrics/svg-badge.svg)](https://weblate.iobroker.net/engage/adapters/?utm_source=widget)
 -->
-![Test and Release](https://github.com/seaspotter/iobroker.victoriametrics/workflows/Test%20and%20Release/badge.svg)
+![Test and Release](https://github.com/seaspotter/ioBroker.victoriametrics/workflows/Test%20and%20Release/badge.svg)
 
 Schreibt ioBroker-Datenpunkt-Historie nativ in [VictoriaMetrics](https://victoriametrics.com/) – über
 dessen [JSON-Lines-Import-API](https://docs.victoriametrics.com/#how-to-import-data-in-json-line-format),
@@ -73,7 +73,7 @@ GitHub-URL, entweder in der Admin-Oberfläche unter "Adapter" → "Custom von UR
 oder per CLI:
 
 ```bash
-iobroker url https://github.com/seaspotter/iobroker.victoriametrics
+iobroker url https://github.com/seaspotter/ioBroker.victoriametrics
 ```
 
 ## Konfiguration
