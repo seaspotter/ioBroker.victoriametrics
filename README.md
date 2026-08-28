@@ -371,6 +371,9 @@ The current retention is visible in three places (all read-only, read once from 
 ## Changelog
 
 ### **WORK IN PROGRESS**
+* (SeaSpotter) README is now the canonical English documentation (required for official repo submission); full German documentation moved to `docs/de/victoriametrics.md`
+* (SeaSpotter) GitHub repository renamed to `ioBroker.victoriametrics` (capital B) to match convention
+* (SeaSpotter) Adapter-checker compliance fixes: trimmed unpublished versions from `common.news`, removed deprecated `common.title`, corrected `keywords`/`common.keywords` per-file rules
 
 ### 0.4.0 (2026-08-28)
 * (SeaSpotter) Fix: the VMUI sidebar link threw a `URIError` on click (`%native_protocol%` wasn't substituted) – correct placeholder syntax per Admin's own source is `%protocol%`/`%host%`/`%port%` without the `native_` prefix
