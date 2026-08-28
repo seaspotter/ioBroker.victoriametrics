@@ -102,6 +102,9 @@
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/seaspotter/ioBroker.victoriametrics/main/admin/victoriametrics.png",
         "readme": "https://github.com/seaspotter/ioBroker.victoriametrics/blob/main/README.md",
+        "docs": {
+            "de": ["docs/de/victoriametrics.md"]
+        },
         "loglevel": "info",
         "tier": 3,
         "mode": "daemon",
