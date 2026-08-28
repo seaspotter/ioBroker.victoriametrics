@@ -381,10 +381,7 @@ vom `/flags`-Endpunkt gelesen):
 
 ## Changelog
 
-<!--
-	Platzhalter für die nächste Version (am Zeilenanfang):
-	### **WORK IN PROGRESS**
--->
+### **WORK IN PROGRESS**
 
 ### 0.4.0 (2026-08-28)
 * (SeaSpotter) Fix: VMUI-Sidebar-Link warf einen `URIError` beim Anklicken (`%native_protocol%` wurde nicht ersetzt) – korrekte Platzhalter-Syntax laut Admin-Quellcode ist `%protocol%`/`%host%`/`%port%` ohne `native_`-Präfix
