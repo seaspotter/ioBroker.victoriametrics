@@ -14,7 +14,8 @@
     "history",
     "prometheus",
     "monitoring",
-    "zeitreihe"
+    "zeitreihe",
+    "ioBroker"
   ],
   "repository": {
     "type": "git",
