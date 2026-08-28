@@ -47,6 +47,17 @@ iobroker url https://github.com/seaspotter/iobroker.victoriametrics
 Über den Button **"Verbindung testen"** wird der `/health`-Endpunkt von VictoriaMetrics mit den
 aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft.
 
+Beim Start des Adapters wird zusätzlich die aktuell auf dem VM-Server konfigurierte Retention
+geloggt (`VictoriaMetrics unter ... erreichbar (Retention: 100y)`) – reines Anzeigen, siehe
+[Retention](#retention) unten, warum sich das nicht über den Adapter ändern lässt.
+
+In der linken Seitenleiste von ioBroker.admin erscheint außerdem ein **"VictoriaMetrics"**-Menüpunkt
+(analog zu Node-RED/Zigbee2MQTT), der die VMUI (VictoriaMetrics' eigene Web-Oberfläche zum
+Ausführen von PromQL-Abfragen, Graphen etc.) direkt unter `http://<Host>:<Port>/vmui/` einbettet.
+**Achtung:** Läuft ioBroker.admin über HTTPS, aber VictoriaMetrics nur über HTTP, blockiert der
+Browser das Einbetten (Mixed-Content-Schutz) – dann öffnet sich eine leere Seite. Abhilfe nur durch
+VictoriaMetrics ebenfalls über HTTPS erreichbar zu machen, ein Workaround im Adapter ist nicht möglich.
+
 ### Tab "Schreibverhalten"
 
 | Feld | Beschreibung |
@@ -72,6 +83,13 @@ auswählen und über den Schalter **"Aktiviert"** einschalten.
 Entprellzeit und Blockzeit sind kombinierbar mit den übrigen Filtern: Entprellzeit
 verzögert das Schreiben, bis der Wert eine Zeit lang stabil war; Blockzeit begrenzt,
 wie oft ein Datenpunkt maximal geschrieben wird, unabhängig davon, ob er sich ändert.
+
+### Tab "Standardwerte"
+
+Dieselben Felder (außer Metrik-Name) lassen sich auch **instanzweit** setzen, im Instanz-Konfig-Tab
+"Standardwerte". Sie gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt
+haben – so muss nicht jeder einzelne Datenpunkt konfiguriert werden. Ein Datenpunkt-eigener Wert
+überschreibt immer den instanzweiten Standard.
 
 ## Metrik-Namensbildung
 
@@ -138,11 +156,40 @@ ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
   `iobroker.influxdb`) – ein `getHistory()`-Aufruf direkt nach einer Zustandsänderung sieht den
   neuesten Wert ggf. erst nach dem nächsten Schreibintervall
 
+## Datenmanagement / Skript-Schnittstellen
+
+Der Adapter beantwortet zusätzlich drei weitere ioBroker-Message-Kommandos (`sendTo`), z.B. für
+Skripte oder Migrationswerkzeuge:
+
+- **`features`** – Capability-Discovery, antwortet `{supportedFeatures: ['storeState', 'deleteAll']}`.
+- **`storeState`** – schreibt einen oder mehrere historische Punkte, z.B. um alte Historie aus
+  einer anderen Quelle (z.B. InfluxDB) nachträglich zu importieren. Nachricht:
+  `{id, state: {val, ts}, rules?}` (auch als Array/Batch). `rules: true` wendet Rundung und
+  Schwellenwert-/Nullwert-Filter an; Entprellzeit/Blockzeit/Minimale Änderung werden **immer**
+  ignoriert, da diese auf Live-Zustandsänderungen ausgelegt sind und für rückdatierte
+  Bulk-Importe keinen Sinn ergeben. Erfordert nicht, dass der Datenpunkt aktuell für
+  Live-Historisierung aktiviert ist.
+- **`deleteAll`** – löscht die komplette in VictoriaMetrics gespeicherte Historie eines
+  Datenpunkts. Nachricht: `{id}` (auch als Array).
+
+**Bewusst nicht implementiert:** `delete`/`deleteRange`/`update` (Einzelpunkt-Löschung/-Bearbeitung,
+wie es das influxdb-Admin-UI per Klick auf einen Chart-Punkt anbietet). VictoriaMetrics kann
+technisch keine einzelnen Datenpunkte löschen oder bearbeiten – nur ganze Zeitreihen per
+Label-Match, da die Speicherung auf unveränderlichen, zeitsortierten Blöcken beruht (wie bei
+Prometheus). Ein Löschen "einzelner Punkte" würde in Wirklichkeit die komplette Zeitreihe löschen –
+das wäre überraschend und gefährlich, deshalb absichtlich weggelassen.
+
+## Retention
+
+VictoriaMetrics' Retention ist ein **serverseitiges Start-Flag** (`-retentionPeriod`) des
+VM-Prozesses selbst, nicht per HTTP-API zur Laufzeit änderbar (anders als z.B. InfluxDB, wo der
+Adapter per `ALTER RETENTION POLICY` aktiv einen Wert setzen kann). Dieser Adapter zeigt die
+aktuell konfigurierte Retention deshalb nur lesend im Log an (siehe oben) – zum Ändern muss VM
+mit einem anderen `-retentionPeriod`-Wert neu gestartet werden.
+
 ## Sonstige bekannte Einschränkungen
 
 - Kein Multi-Cluster-Support (vminsert/vmselect) – nur ein Single-Node-Ziel.
-- Retention/Downsampling wird ausschließlich VictoriaMetrics-seitig konfiguriert
-  (`-retentionPeriod`), nicht über diesen Adapter.
 - Freie, pro Datenpunkt konfigurierbare Zusatz-Labels (über `unit` hinaus) sind nicht
   implementiert.
 
@@ -157,6 +204,9 @@ ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
 | `npm run dev-server` | Startet [`dev-server`](https://github.com/ioBroker/dev-server) für einen lokalen Testlauf inkl. Admin-UI |
 
 ## Changelog
+
+### 0.3.0
+* (Florian Horch) VMUI-Sidebar-Link, instanzweite Standardwerte für die Historie-Filter, Retention-Anzeige (read-only), storeState/deleteAll/features-Messages für Skripte/Migration
 
 ### 0.2.0
 * (Florian Horch) Phase 2 Proof-of-Concept: getHistory()-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek

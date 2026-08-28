@@ -6,6 +6,7 @@ const metricName = require('./lib/metricName');
 const { VmClient } = require('./lib/vmClient');
 const { SeriesBuffer } = require('./lib/buffer');
 const { handleGetHistory } = require('./lib/history');
+const { handleStoreState, handleDeleteAll, handleFeatures } = require('./lib/dataManagement');
 
 /**
  * Parst ein optionales, aus dem Admin-UI kommendes Zahlenfeld (kann Zahl,
@@ -70,8 +71,10 @@ class Victoriametrics extends utils.Adapter {
 
         const health = await this.vmClient.testHealth(this.config);
         if (health.ok) {
+            const retention = await this.vmClient.getRetention(this.config);
+            const retentionInfo = retention.ok && retention.retention ? ` (Retention: ${retention.retention})` : '';
             this.log.info(
-                `VictoriaMetrics unter ${this.config.protocol}://${this.config.host}:${this.config.port} erreichbar`,
+                `VictoriaMetrics unter ${this.config.protocol}://${this.config.host}:${this.config.port} erreichbar${retentionInfo}`,
             );
         } else {
             this.log.warn(
@@ -176,7 +179,7 @@ class Victoriametrics extends utils.Adapter {
             return;
         }
 
-        const debounceMs = parseOptionalNumber(settings.debounceTime);
+        const debounceMs = this._resolveNumberSetting(settings, 'debounceTime', 'defaultDebounceTime');
         if (debounceMs !== undefined && debounceMs > 0) {
             const pending = this.debounceTimers.get(id);
             if (pending) {
@@ -244,42 +247,63 @@ class Victoriametrics extends utils.Adapter {
     }
 
     /**
-     * Prüft die Schwellenwerte ignoreBelowNumber/ignoreAboveNumber.
+     * Liest eine optionale Zahl-Einstellung: Pro-Datenpunkt-Wert, falls gesetzt, sonst
+     * der instanzweite Standardwert aus this.config, sonst undefined. So müssen Nutzer
+     * mit vielen Datenpunkten nicht jeden einzeln konfigurieren.
+     *
+     * @param {object} settings - Custom-Settings des Datenpunkts
+     * @param {string} key - Feldname in settings (z.B. "round")
+     * @param {string} defaultsKey - Feldname in this.config für den instanzweiten Standard (z.B. "defaultRound")
+     * @returns {number | undefined} Zahl oder undefined, wenn weder Datenpunkt noch Standard gesetzt sind
+     */
+    _resolveNumberSetting(settings, key, defaultsKey) {
+        const perPoint = parseOptionalNumber(settings[key]);
+        if (perPoint !== undefined) {
+            return perPoint;
+        }
+        return parseOptionalNumber(this.config[defaultsKey]);
+    }
+
+    /**
+     * Prüft die Schwellenwerte ignoreBelowNumber/ignoreAboveNumber (Datenpunkt- oder
+     * instanzweiter Standardwert).
      *
      * @param {number} value - Umgewandelter Zahlenwert
      * @param {{ignoreBelowNumber?: string | number, ignoreAboveNumber?: string | number}} settings - Custom-Settings des Datenpunkts
      * @returns {boolean} true, wenn der Wert außerhalb des erlaubten Bereichs liegt
      */
     _isOutsideThreshold(value, settings) {
-        const below = parseOptionalNumber(settings.ignoreBelowNumber);
+        const below = this._resolveNumberSetting(settings, 'ignoreBelowNumber', 'defaultIgnoreBelowNumber');
         if (below !== undefined && value < below) {
             return true;
         }
-        const above = parseOptionalNumber(settings.ignoreAboveNumber);
+        const above = this._resolveNumberSetting(settings, 'ignoreAboveNumber', 'defaultIgnoreAboveNumber');
         return above !== undefined && value > above;
     }
 
     /**
-     * Prüft, ob Nullwerte für diesen Datenpunkt ignoriert werden sollen (ignoreZero).
+     * Prüft, ob Nullwerte für diesen Datenpunkt ignoriert werden sollen (ignoreZero,
+     * Datenpunkt- oder instanzweiter Standardwert).
      *
      * @param {number} value - Umgewandelter Zahlenwert
      * @param {{ignoreZero?: boolean}} settings - Custom-Settings des Datenpunkts
      * @returns {boolean} true, wenn der Wert übersprungen werden soll
      */
     _isIgnoredZero(value, settings) {
-        return !!settings.ignoreZero && value === 0;
+        const ignoreZero = settings.ignoreZero !== undefined ? settings.ignoreZero : this.config.defaultIgnoreZero;
+        return !!ignoreZero && value === 0;
     }
 
     /**
-     * Rundet den Wert auf die im Historie-Tab konfigurierte Anzahl Nachkommastellen,
-     * sofern gesetzt.
+     * Rundet den Wert auf die konfigurierte Anzahl Nachkommastellen (Datenpunkt- oder
+     * instanzweiter Standardwert), sofern gesetzt.
      *
      * @param {number} value - Umgewandelter Zahlenwert
      * @param {{round?: string | number}} settings - Custom-Settings des Datenpunkts
      * @returns {number} Ggf. gerundeter Wert
      */
     _applyRounding(value, settings) {
-        const decimals = parseOptionalNumber(settings.round);
+        const decimals = this._resolveNumberSetting(settings, 'round', 'defaultRound');
         if (decimals === undefined || decimals < 0) {
             return value;
         }
@@ -289,9 +313,9 @@ class Victoriametrics extends utils.Adapter {
 
     /**
      * Prüft, ob der neue Wert sich vom zuletzt geschriebenen Wert um weniger als die
-     * konfigurierte Mindestdifferenz (changesMinDelta) unterscheidet und deshalb
-     * übersprungen werden soll. Der allererste Wert eines Datenpunkts wird nie
-     * übersprungen.
+     * konfigurierte Mindestdifferenz (changesMinDelta, Datenpunkt- oder instanzweiter
+     * Standardwert) unterscheidet und deshalb übersprungen werden soll. Der allererste
+     * Wert eines Datenpunkts wird nie übersprungen.
      *
      * @param {string} id - Objekt-ID
      * @param {number} value - Neuer (bereits gerundeter) Wert
@@ -299,7 +323,7 @@ class Victoriametrics extends utils.Adapter {
      * @returns {boolean} true, wenn der Wert übersprungen werden soll
      */
     _isBelowMinDelta(id, value, settings) {
-        const minDelta = parseOptionalNumber(settings.changesMinDelta);
+        const minDelta = this._resolveNumberSetting(settings, 'changesMinDelta', 'defaultChangesMinDelta');
         if (minDelta === undefined || minDelta <= 0) {
             return false;
         }
@@ -308,15 +332,16 @@ class Victoriametrics extends utils.Adapter {
     }
 
     /**
-     * Prüft die Blockzeit (blockTime): ignoriert neue Werte für die konfigurierte
-     * Zeitspanne nach dem zuletzt geschriebenen Wert dieses Datenpunkts.
+     * Prüft die Blockzeit (blockTime, Datenpunkt- oder instanzweiter Standardwert):
+     * ignoriert neue Werte für die konfigurierte Zeitspanne nach dem zuletzt
+     * geschriebenen Wert dieses Datenpunkts.
      *
      * @param {string} id - Objekt-ID
      * @param {{blockTime?: string | number}} settings - Custom-Settings des Datenpunkts
      * @returns {boolean} true, wenn der Wert übersprungen werden soll
      */
     _isBlockedByBlockTime(id, settings) {
-        const blockMs = parseOptionalNumber(settings.blockTime);
+        const blockMs = this._resolveNumberSetting(settings, 'blockTime', 'defaultBlockTime');
         if (blockMs === undefined || blockMs <= 0) {
             return false;
         }
@@ -477,7 +502,8 @@ class Victoriametrics extends utils.Adapter {
 
     /**
      * Some message was sent to this instance over message box (Verbindungstest-Button
-     * im Admin-UI, sowie getHistory-Anfragen von vis-Chart-Widgets).
+     * im Admin-UI, getHistory-Anfragen von vis-Chart-Widgets, sowie storeState/
+     * deleteAll/features für Skripte und Admin-Capability-Discovery).
      *
      * @param {ioBroker.Message} obj - Empfangene Nachricht
      */
@@ -486,7 +512,18 @@ class Victoriametrics extends utils.Adapter {
             await handleGetHistory(this, obj);
             return;
         }
-
+        if (obj.command === 'storeState') {
+            await handleStoreState(this, obj);
+            return;
+        }
+        if (obj.command === 'deleteAll') {
+            await handleDeleteAll(this, obj);
+            return;
+        }
+        if (obj.command === 'features') {
+            handleFeatures(this, obj);
+            return;
+        }
         if (obj.command !== 'testConnection') {
             return;
         }

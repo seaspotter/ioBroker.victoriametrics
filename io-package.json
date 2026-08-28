@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "victoriametrics",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "news": {
+            "0.3.0": {
+                "en": "VMUI sidebar link, instance-wide defaults, storeState/deleteAll/features messages, retention display",
+                "de": "VMUI-Sidebar-Link, instanzweite Standardwerte, storeState/deleteAll/features-Nachrichten, Retention-Anzeige"
+            },
             "0.2.0": {
                 "en": "Phase 2 proof-of-concept: getHistory() read path via @iobroker/aggregate",
                 "de": "Phase 2 Proof-of-Concept: getHistory()-Lesepfad über @iobroker/aggregate"
@@ -64,6 +68,14 @@
             "config": "json",
             "custom": "json"
         },
+        "adminTab": {
+            "link": "%native_protocol%://%native_host%:%native_port%/vmui/",
+            "name": {
+                "en": "VictoriaMetrics",
+                "de": "VictoriaMetrics"
+            },
+            "singleton": true
+        },
         "supportCustoms": true,
         "encryptedNative": ["password"],
         "protectedNative": ["password"],
@@ -87,7 +99,14 @@
         "password": "",
         "requestTimeout": 5000,
         "writeInterval": 10,
-        "bufferMaxSize": 1000
+        "bufferMaxSize": 1000,
+        "defaultRound": "",
+        "defaultChangesMinDelta": "",
+        "defaultDebounceTime": "",
+        "defaultBlockTime": "",
+        "defaultIgnoreBelowNumber": "",
+        "defaultIgnoreAboveNumber": "",
+        "defaultIgnoreZero": false
     },
     "objects": [],
     "instanceObjects": [

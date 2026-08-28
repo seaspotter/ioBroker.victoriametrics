@@ -10,7 +10,8 @@
             "newLine": true,
             "min": 0,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultDebounceTime"
         },
         "blockTime": {
             "type": "number",
@@ -19,7 +20,8 @@
             "hidden": "!data.enabled",
             "min": 0,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultBlockTime"
         },
         "ignoreBelowNumber": {
             "type": "number",
@@ -27,20 +29,23 @@
             "hidden": "!data.enabled",
             "newLine": true,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultIgnoreBelowNumber"
         },
         "ignoreAboveNumber": {
             "type": "number",
             "label": "Ignoriere Werte größer als (optional)",
             "hidden": "!data.enabled",
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultIgnoreAboveNumber"
         },
         "ignoreZero": {
             "type": "checkbox",
             "label": "Ignoriere Nullwerte (0)",
             "hidden": "!data.enabled",
-            "newLine": true
+            "newLine": true,
+            "defaultFunc": "instanceObj.native.defaultIgnoreZero"
         },
         "aliasId": {
             "type": "text",
@@ -59,7 +64,8 @@
             "newLine": true,
             "min": 0,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultRound"
         },
         "changesMinDelta": {
             "type": "number",
@@ -68,7 +74,8 @@
             "hidden": "!data.enabled",
             "min": 0,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultChangesMinDelta"
         }
     }
 }

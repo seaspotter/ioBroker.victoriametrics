@@ -1,6 +1,6 @@
 {
   "name": "iobroker.victoriametrics",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
   "author": {
     "name": "Florian Horch",

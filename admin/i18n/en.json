@@ -27,5 +27,7 @@
     "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.": "Ignores new values for the given time after the last written value.",
     "Ignoriere Werte kleiner als (optional)": "Ignore values below (optional)",
     "Ignoriere Werte größer als (optional)": "Ignore values above (optional)",
-    "Ignoriere Nullwerte (0)": "Ignore zero values (0)"
+    "Ignoriere Nullwerte (0)": "Ignore zero values (0)",
+    "Standardwerte": "Defaults",
+    "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.": "Apply to all datapoints that don't set their own value in the Historie tab."
 }

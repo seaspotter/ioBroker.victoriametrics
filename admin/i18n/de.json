@@ -27,5 +27,7 @@
     "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.": "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.",
     "Ignoriere Werte kleiner als (optional)": "Ignoriere Werte kleiner als (optional)",
     "Ignoriere Werte größer als (optional)": "Ignoriere Werte größer als (optional)",
-    "Ignoriere Nullwerte (0)": "Ignoriere Nullwerte (0)"
+    "Ignoriere Nullwerte (0)": "Ignoriere Nullwerte (0)",
+    "Standardwerte": "Standardwerte",
+    "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.": "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben."
 }

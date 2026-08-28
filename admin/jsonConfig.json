@@ -123,6 +123,65 @@
                     "lg": 3
                 }
             }
+        },
+        "defaultsTab": {
+            "type": "panel",
+            "label": "Standardwerte",
+            "items": {
+                "defaultsInfo": {
+                    "type": "staticText",
+                    "text": "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.",
+                    "newLine": true
+                },
+                "defaultDebounceTime": {
+                    "type": "number",
+                    "label": "Entprellzeit (ms, optional)",
+                    "min": 0,
+                    "newLine": true,
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultBlockTime": {
+                    "type": "number",
+                    "label": "Blockzeit (ms, optional)",
+                    "min": 0,
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultIgnoreBelowNumber": {
+                    "type": "number",
+                    "label": "Ignoriere Werte kleiner als (optional)",
+                    "newLine": true,
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultIgnoreAboveNumber": {
+                    "type": "number",
+                    "label": "Ignoriere Werte größer als (optional)",
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultIgnoreZero": {
+                    "type": "checkbox",
+                    "label": "Ignoriere Nullwerte (0)",
+                    "newLine": true
+                },
+                "defaultRound": {
+                    "type": "number",
+                    "label": "Runden auf Nachkommastellen (optional)",
+                    "min": 0,
+                    "newLine": true,
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultChangesMinDelta": {
+                    "type": "number",
+                    "label": "Minimale Änderung (optional)",
+                    "min": 0,
+                    "sm": 6,
+                    "md": 4
+                }
+            }
         }
     }
 }
