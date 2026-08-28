@@ -17,7 +17,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 3,
-                    "lg": 2
+                    "lg": 2,
+                    "xl": 2
                 },
                 "host": {
                     "type": "text",
@@ -26,7 +27,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 5,
-                    "lg": 4
+                    "lg": 4,
+                    "xl": 4
                 },
                 "port": {
                     "type": "number",
@@ -36,7 +38,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "useAuth": {
                     "type": "checkbox",
@@ -45,7 +48,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "username": {
                     "type": "text",
@@ -54,7 +58,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "password": {
                     "type": "password",
@@ -63,7 +68,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "requestTimeout": {
                     "type": "number",
@@ -73,7 +79,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "testConnectionDivider": {
                     "type": "divider",
@@ -91,6 +98,7 @@
                     "sm": 6,
                     "md": 4,
                     "lg": 3,
+                    "xl": 3,
                     "error": {
                         "connect timeout": "Zeitüberschreitung bei der Verbindung"
                     },
@@ -113,7 +121,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 },
                 "bufferMaxSize": {
                     "type": "number",
@@ -123,7 +132,8 @@
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xl": 3
                 }
             }
         },
@@ -134,67 +144,103 @@
                 "defaultsInfo": {
                     "type": "staticText",
                     "text": "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.",
-                    "newLine": true
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
                 },
                 "defaultDebounceTime": {
                     "type": "number",
                     "label": "Entprellzeit (ms, optional)",
                     "min": 0,
                     "newLine": true,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultBlockTime": {
                     "type": "number",
                     "label": "Blockzeit (ms, optional)",
                     "min": 0,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultIgnoreBelowNumber": {
                     "type": "number",
                     "label": "Ignoriere Werte kleiner als (optional)",
                     "newLine": true,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultIgnoreAboveNumber": {
                     "type": "number",
                     "label": "Ignoriere Werte größer als (optional)",
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultIgnoreZero": {
                     "type": "checkbox",
                     "label": "Ignoriere Nullwerte (0)",
-                    "newLine": true
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultRound": {
                     "type": "number",
                     "label": "Runden auf Nachkommastellen (optional)",
                     "min": 0,
                     "newLine": true,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultChangesMinDelta": {
                     "type": "number",
                     "label": "Minimale Änderung (optional)",
                     "min": 0,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultChangesOnly": {
                     "type": "checkbox",
                     "label": "Nur Änderungen aufzeichnen",
-                    "newLine": true
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 },
                 "defaultChangesRelogInterval": {
                     "type": "number",
                     "label": "Relog-Intervall (ms, optional)",
                     "min": 0,
+                    "xs": 12,
                     "sm": 6,
-                    "md": 4
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
                 }
             }
         }

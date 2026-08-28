@@ -9,8 +9,11 @@
             "hidden": "!data.enabled",
             "newLine": true,
             "min": 0,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultDebounceTime"
         },
         "blockTime": {
@@ -19,8 +22,11 @@
             "help": "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.",
             "hidden": "!data.enabled",
             "min": 0,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultBlockTime"
         },
         "ignoreBelowNumber": {
@@ -28,16 +34,22 @@
             "label": "Ignoriere Werte kleiner als (optional)",
             "hidden": "!data.enabled",
             "newLine": true,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultIgnoreBelowNumber"
         },
         "ignoreAboveNumber": {
             "type": "number",
             "label": "Ignoriere Werte größer als (optional)",
             "hidden": "!data.enabled",
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultIgnoreAboveNumber"
         },
         "ignoreZero": {
@@ -45,6 +57,11 @@
             "label": "Ignoriere Nullwerte (0)",
             "hidden": "!data.enabled",
             "newLine": true,
+            "xs": 12,
+            "sm": 12,
+            "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultIgnoreZero"
         },
         "aliasId": {
@@ -53,8 +70,11 @@
             "help": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.",
             "hidden": "!data.enabled",
             "newLine": true,
+            "xs": 12,
             "sm": 12,
-            "md": 8
+            "md": 8,
+            "lg": 8,
+            "xl": 8
         },
         "round": {
             "type": "number",
@@ -63,8 +83,11 @@
             "hidden": "!data.enabled",
             "newLine": true,
             "min": 0,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultRound"
         },
         "changesMinDelta": {
@@ -73,8 +96,11 @@
             "help": "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.",
             "hidden": "!data.enabled",
             "min": 0,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultChangesMinDelta"
         },
         "changesOnly": {
@@ -83,6 +109,11 @@
             "help": "Schreibt einen Wert nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet.",
             "hidden": "!data.enabled",
             "newLine": true,
+            "xs": 12,
+            "sm": 12,
+            "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultChangesOnly"
         },
         "changesRelogInterval": {
@@ -91,8 +122,11 @@
             "help": "Schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen. Nur wirksam bei aktiviertem 'Nur Änderungen aufzeichnen'.",
             "hidden": "!data.enabled || !data.changesOnly",
             "min": 0,
+            "xs": 12,
             "sm": 6,
             "md": 4,
+            "lg": 4,
+            "xl": 4,
             "defaultFunc": "instanceObj.native.defaultChangesRelogInterval"
         }
     }

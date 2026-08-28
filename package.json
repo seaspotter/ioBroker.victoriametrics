@@ -22,7 +22,7 @@
     "url": "git+https://github.com/seaspotter/ioBroker.victoriametrics.git"
   },
   "engines": {
-    "node": ">= 20"
+    "node": ">=22"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
@@ -38,9 +38,9 @@
     "@iobroker/dev-server": "^0.8.0",
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/testing": "^5.3.0",
-    "@tsconfig/node20": "^20.1.10",
+    "@tsconfig/node22": "^22.0.6",
     "@types/iobroker": "npm:@iobroker/types@^7.2.2",
-    "@types/node": "^20.19.43",
+    "@types/node": "^22.20.1",
     "typescript": "~5.9.3"
   },
   "main": "main.js",
