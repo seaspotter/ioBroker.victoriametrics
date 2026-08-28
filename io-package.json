@@ -106,6 +106,15 @@
                 "def": false
             },
             "native": {}
+        },
+        {
+            "_id": "cache",
+            "type": "meta",
+            "common": {
+                "name": "Puffer-Cache",
+                "type": "meta.folder"
+            },
+            "native": {}
         }
     ]
 }

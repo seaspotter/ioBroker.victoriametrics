@@ -292,7 +292,7 @@ class Victoriametrics extends utils.Adapter {
     async _persistCache() {
         try {
             const data = this.buffer.toJSON(CONFIG.CACHE_FORMAT_VERSION);
-            await this.writeFileAsync(this.namespace, CONFIG.CACHE_FILE_NAME, JSON.stringify(data));
+            await this.writeFileAsync(`${this.namespace}.cache`, CONFIG.CACHE_FILE_NAME, JSON.stringify(data));
         } catch (err) {
             this.log.debug(`Konnte Puffer-Cache nicht schreiben: ${err.message}`);
         }
@@ -304,7 +304,7 @@ class Victoriametrics extends utils.Adapter {
      */
     async _loadCache() {
         try {
-            const result = await this.readFileAsync(this.namespace, CONFIG.CACHE_FILE_NAME);
+            const result = await this.readFileAsync(`${this.namespace}.cache`, CONFIG.CACHE_FILE_NAME);
             const raw = result && result.file;
             const data = JSON.parse(raw ? raw.toString() : '{}');
             const loaded = SeriesBuffer.fromJSON(data, CONFIG.CACHE_FORMAT_VERSION);
