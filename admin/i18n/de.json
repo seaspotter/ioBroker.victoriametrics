@@ -16,5 +16,9 @@
     "Max. Puffergröße (Punkte)": "Max. Puffergröße (Punkte)",
     "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall": "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall",
     "Metrik-Name (optional)": "Metrik-Name (optional)",
-    "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung."
+    "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.",
+    "Runden auf Nachkommastellen (optional)": "Runden auf Nachkommastellen (optional)",
+    "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.": "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.",
+    "Minimale Änderung (optional)": "Minimale Änderung (optional)",
+    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung."
 }

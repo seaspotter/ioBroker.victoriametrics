@@ -8,6 +8,22 @@
             "help": "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.",
             "hidden": "!data.enabled",
             "newLine": true
+        },
+        "round": {
+            "type": "number",
+            "label": "Runden auf Nachkommastellen (optional)",
+            "help": "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.",
+            "hidden": "!data.enabled",
+            "newLine": true,
+            "min": 0
+        },
+        "changesMinDelta": {
+            "type": "number",
+            "label": "Minimale Änderung (optional)",
+            "help": "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.",
+            "hidden": "!data.enabled",
+            "newLine": true,
+            "min": 0
         }
     }
 }

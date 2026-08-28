@@ -16,5 +16,9 @@
     "Max. Puffergröße (Punkte)": "Max. buffer size (points)",
     "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall": "Triggers an immediate write when reached, independent of the write interval",
     "Metrik-Name (optional)": "Metric name (optional)",
-    "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Overrides the metric name (__name__) automatically derived from the object ID. Leave empty for the default derivation."
+    "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Overrides the metric name (__name__) automatically derived from the object ID. Leave empty for the default derivation.",
+    "Runden auf Nachkommastellen (optional)": "Round to decimal places (optional)",
+    "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.": "Rounds the value to the given number of decimal places before writing. Leave empty for no rounding.",
+    "Minimale Änderung (optional)": "Minimum change (optional)",
+    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Values that differ from the last written value by less than this amount are not written. Leave empty for no filtering."
 }

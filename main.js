@@ -20,6 +20,8 @@ class Victoriametrics extends utils.Adapter {
         this.enabledPoints = new Map();
         /** ID -> object.common (für type/unit) */
         this.objectCache = new Map();
+        /** ID -> zuletzt geschriebener Wert (für changesMinDelta) */
+        this.lastValues = new Map();
         /** Fehlerzähler pro Punkt-ID */
         this.errorPoints = {};
         this.subscribedAll = false;
@@ -126,6 +128,7 @@ class Victoriametrics extends utils.Adapter {
         } else if (wasEnabled) {
             this.enabledPoints.delete(id);
             this.objectCache.delete(id);
+            this.lastValues.delete(id);
             if (!this.subscribedAll) {
                 this.unsubscribeForeignStates(id);
             }
@@ -148,10 +151,16 @@ class Victoriametrics extends utils.Adapter {
         }
 
         const common = this.objectCache.get(id) || {};
-        const value = this._convertValue(state.val, id);
+        let value = this._convertValue(state.val, id);
         if (value === null) {
             return;
         }
+        value = this._applyRounding(value, settings);
+
+        if (this._isBelowMinDelta(id, value, settings)) {
+            return;
+        }
+        this.lastValues.set(id, value);
 
         /** @type {Record<string, string>} */
         const labels = {};
@@ -166,6 +175,53 @@ class Victoriametrics extends utils.Adapter {
         if (this.buffer.size() >= this.config.bufferMaxSize) {
             this.flush();
         }
+    }
+
+    /**
+     * Rundet den Wert auf die im Historie-Tab konfigurierte Anzahl Nachkommastellen,
+     * sofern gesetzt.
+     *
+     * @param {number} value - Umgewandelter Zahlenwert
+     * @param {{round?: string | number}} settings - Custom-Settings des Datenpunkts
+     * @returns {number} Ggf. gerundeter Wert
+     */
+    _applyRounding(value, settings) {
+        if (settings.round === undefined || settings.round === '' || settings.round === null) {
+            return value;
+        }
+        const decimals = Number(settings.round);
+        if (!Number.isFinite(decimals) || decimals < 0) {
+            return value;
+        }
+        const factor = 10 ** decimals;
+        return Math.round(value * factor) / factor;
+    }
+
+    /**
+     * Prüft, ob der neue Wert sich vom zuletzt geschriebenen Wert um weniger als die
+     * konfigurierte Mindestdifferenz (changesMinDelta) unterscheidet und deshalb
+     * übersprungen werden soll. Der allererste Wert eines Datenpunkts wird nie
+     * übersprungen.
+     *
+     * @param {string} id - Objekt-ID
+     * @param {number} value - Neuer (bereits gerundeter) Wert
+     * @param {{changesMinDelta?: string | number}} settings - Custom-Settings des Datenpunkts
+     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     */
+    _isBelowMinDelta(id, value, settings) {
+        if (
+            settings.changesMinDelta === undefined ||
+            settings.changesMinDelta === '' ||
+            settings.changesMinDelta === null
+        ) {
+            return false;
+        }
+        const minDelta = Number(settings.changesMinDelta);
+        if (!Number.isFinite(minDelta) || minDelta <= 0) {
+            return false;
+        }
+        const last = this.lastValues.get(id);
+        return last !== undefined && Math.abs(value - last) < minDelta;
     }
 
     /**

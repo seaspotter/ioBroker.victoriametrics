@@ -55,9 +55,13 @@ aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft.
 ### Datenpunkte historisieren
 
 Im Objektbaum bei jedem gewünschten Datenpunkt den Tab **"Historie"** öffnen, diesen Adapter
-auswählen und über den Schalter **"Aktiviert"** einschalten. Optional kann im Feld
-**"Metrik-Name"** ein eigener Name vergeben werden, der die automatische Ableitung überschreibt
-(siehe unten).
+auswählen und über den Schalter **"Aktiviert"** einschalten.
+
+| Feld | Beschreibung |
+|------|--------------|
+| Metrik-Name (optional) | Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (`__name__`), siehe unten |
+| Runden auf Nachkommastellen (optional) | Rundet den Wert vor dem Schreiben; leer lassen für keine Rundung |
+| Minimale Änderung (optional) | Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben; leer lassen für keine Filterung |
 
 ## Metrik-Namensbildung
 
