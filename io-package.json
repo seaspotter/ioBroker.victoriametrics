@@ -1,186 +1,199 @@
 {
-    "common": {
-        "name": "victoriametrics",
-        "version": "0.4.1",
-        "news": {
-            "0.4.1": {
-                "en": "English README, German docs/de split, adapter-checker compliance fixes",
-                "de": "Englisches README, deutsche docs/de-Aufteilung, Adapter-Checker-Korrekturen",
-                "ru": "Английский README, немецкая документация/разделение, исправления соответствия адаптера",
-                "pt": "README em inglês, documentos/de split em alemão, correções de conformidade do verificador de adaptador",
-                "nl": "Engelse README, Duitse docs/de split, conformiteitsoplossingen voor adapter-checker",
-                "fr": "README anglais, documents allemands/de split, correctifs de conformité du vérificateur d'adaptateur",
-                "it": "README inglese, divisione docs/de tedesco, correzioni di conformità del controllo dell'adattatore",
-                "es": "README en inglés, documentos alemanes/de split, correcciones de cumplimiento del verificador de adaptadores",
-                "pl": "Plik README w języku angielskim, dokumentacja w języku niemieckim/de split, poprawki dotyczące zgodności modułu sprawdzania adapterów",
-                "uk": "Англійська README, німецька docs/de split, виправлення відповідності адаптера",
-                "zh-cn": "英语自述文件、德语文档/de split、适配器检查器合规性修复"
-            },
-            "0.4.0": {
-                "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
-                "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon",
-                "ru": "Продвижение PromQL на стороне сервера, getHistory с несколькими идентификаторами,changeOnly/changesRelogInterval, проверка сохранения соединения, новый значок",
-                "pt": "Pushdown do lado do servidor PromQL, getHistory multi-id, changeOnly/changesRelogInterval, retenção no teste de conexão, novo ícone",
-                "nl": "PromQL pushdown op de server, multi-id getHistory, changeOnly/changesRelogInterval, retentie in verbindingstest, nieuw pictogram",
-                "fr": "Refoulement côté serveur PromQL, getHistory multi-id, changesOnly/changesRelogInterval, rétention dans le test de connexion, nouvelle icône",
-                "it": "Pushdown lato server PromQL, getHistory multi-id, changeOnly/changesRelogInterval, mantenimento nel test di connessione, nuova icona",
-                "es": "Pushdown del lado del servidor PromQL, getHistory de múltiples ID, cambiosOnly/changesRelogInterval, prueba de retención en la conexión, nuevo icono",
-                "pl": "PromQL pushdown po stronie serwera, getHistory z wieloma identyfikatorami, zmianyOnly/changesRelogInterval, test zachowania połączenia, nowa ikona",
-                "uk": "PromQL на стороні сервера, що повертається, getHistory з декількома ідентифікаторами, changesOnly/changesRelogInterval, утримання під час перевірки з’єднання, новий значок",
-                "zh-cn": "PromQL 服务器端下推、多 id getHistory、changesOnly/changesRelogInterval、连接测试中的保留、新图标"
-            }
-        },
-        "titleLang": {
-            "en": "VictoriaMetrics",
-            "de": "VictoriaMetrics",
-            "ru": "ВикторияМетрикс",
-            "pt": "VictoriaMetrics",
-            "nl": "VictoriaMetrics",
-            "fr": "VictoriaMetrics",
-            "it": "VictoriaMetrics",
-            "es": "VictoriaMétricas",
-            "pl": "VictoriaMetrics",
-            "uk": "ВікторіяМетрикс",
-            "zh-cn": "维多利亚指标"
-        },
-        "desc": {
-            "en": "Writes ioBroker datapoint history natively to VictoriaMetrics",
-            "de": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
-            "ru": "Записывает историю точек данных ioBroker нативно в VictoriaMetrics",
-            "pt": "Grava o histórico de pontos de dados do ioBroker nativamente no VictoriaMetrics",
-            "nl": "Schrijft ioBroker-datapuntgeschiedenis native naar VictoriaMetrics",
-            "fr": "Écrit nativement l'historique des points de données ioBroker dans VictoriaMetrics",
-            "it": "Scrive nativamente la cronologia dei punti dati ioBroker in VictoriaMetrics",
-            "es": "Escribe el historial de puntos de datos de ioBroker de forma nativa en VictoriaMetrics",
-            "pl": "Natywnie zapisuje historię punktów danych ioBroker w VictoriaMetrics",
-            "uk": "Записує історію точок даних ioBroker нативно у VictoriaMetrics",
-            "zh-cn": "将 ioBroker 数据点历史原生写入 VictoriaMetrics"
-        },
-        "authors": [
-            "SeaSpotter <seatowage@gmail.com>"
-        ],
-        "keywords": [
-            "victoriametrics",
-            "history",
-            "prometheus",
-            "monitoring",
-            "zeitreihe"
-        ],
-        "licenseInformation": {
-            "type": "free",
-            "license": "MIT"
-        },
-        "platform": "Javascript/Node.js",
-        "icon": "victoriametrics.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/seaspotter/ioBroker.victoriametrics/main/admin/victoriametrics.png",
-        "readme": "https://github.com/seaspotter/ioBroker.victoriametrics/blob/main/README.md",
-        "loglevel": "info",
-        "tier": 3,
-        "mode": "daemon",
-        "type": "storage",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "push",
-        "messagebox": true,
-        "getHistory": true,
-        "adminUI": {
-            "config": "json",
-            "custom": "json"
-        },
-        "adminTab": {
-            "link": "%protocol%://%host%:%port%/vmui/",
-            "name": {
-                "en": "VictoriaMetrics",
-                "de": "VictoriaMetrics"
-            },
-            "singleton": true
-        },
-        "supportCustoms": true,
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=7.6.20"
-            }
-        ]
+  "common": {
+    "name": "victoriametrics",
+    "version": "0.4.2",
+    "news": {
+      "0.4.2": {
+        "en": "Fixed official ioBroker repo-checker findings: moved `encryptedNative`/`protectedNative` to the top level of `io-package.json` (were incorrectly nested under `common`), removed `common.docs` (redundant with the English README), fixed `info.retention`'s role, bumped `engines.node`/admin dependency minimums, added full responsive breakpoints to all admin config fields\nAdded `CHANGELOG_OLD.md`, `.github/dependabot.yml`, and dependabot auto-merge workflow\nReleases now auto-publish to npm via trusted publishing (OIDC) and auto-create the GitHub release when a version tag is pushed",
+        "de": "Offizielle Fehler im ioBroker-Repository-Checker behoben: `encryptedNative`/`protectedNative` wurden in die oberste Ebene von `io-package.json` verschoben (sie waren fälschlicherweise unter `common` verschachtelt), `common.docs` wurde entfernt (da es mit der englischen README-Datei redundant war), die Rolle von `info.retention` wurde korrigiert, die Mindestanforderungen für `engines.node`/admin wurden erhöht und allen Admin-Konfigurationsfeldern wurden responsive Breakpoints hinzugefügt.\nDie Dateien `CHANGELOG_OLD.md`, `.github/dependabot.yml` und der Dependabot-Auto-Merge-Workflow wurden hinzugefügt.\nReleases werden nun automatisch über Trusted Publishing (OIDC) auf npm veröffentlicht und erstellen automatisch das GitHub-Release, sobald ein Versions-Tag gepusht wird.",
+        "ru": "Исправлены ошибки, выявленные официальным репозиторием ioBroker: переменные `encryptedNative`/`protectedNative` перемещены на верхний уровень файла `io-package.json` (ранее они были некорректно вложены в `common`), удален файл `common.docs` (избыточный по отношению к английскому README), исправлена роль `info.retention`, увеличены минимальные требования к зависимостям `engines.node`/admin, добавлены точки останова для полной адаптивности во все поля конфигурации административной панели.\nДобавлены файлы `CHANGELOG_OLD.md`, `.github/dependabot.yml` и рабочий процесс автоматического слияния dependabot.\nТеперь релизы автоматически публикуются в npm через доверенную публикацию (OIDC) и автоматически создаются в релизе GitHub при добавлении тега версии.",
+        "pt": "Corrigidas as descobertas do verificador de repositório oficial do ioBroker: movi `encryptedNative`/`protectedNative` para o nível superior de `io-package.json` (estavam incorretamente aninhados em `common`), removi `common.docs` (redundante com o README em inglês), corrigi a função de `info.retention`, aumentei os requisitos mínimos de dependência de `engines.node`/admin e adicionei breakpoints responsivos completos a todos os campos de configuração do administrador.\nAdicionados os arquivos `CHANGELOG_OLD.md`, `.github/dependabot.yml` e o fluxo de trabalho de mesclagem automática do Dependabot.\nAgora, as versões são publicadas automaticamente no npm por meio de publicação confiável (OIDC) e a versão no GitHub é criada automaticamente quando uma tag de versão é enviada.",
+        "nl": "De bevindingen van de officiële ioBroker repo-checker zijn gecorrigeerd: `encryptedNative`/`protectedNative` zijn verplaatst naar het hoogste niveau van `io-package.json` (ze waren onjuist genest onder `common`), `common.docs` is verwijderd (overbodig met de Engelse README), de rol van `info.retention` is gecorrigeerd, de minimale vereisten voor `engines.node`/admin-afhankelijkheden zijn verhoogd en er zijn volledig responsieve breakpoints toegevoegd aan alle configuratievelden van de admin-interface.\n`CHANGELOG_OLD.md`, `.github/dependabot.yml` en de automatische samenvoegingsworkflow van Dependabot zijn toegevoegd.\nReleases worden nu automatisch gepubliceerd naar npm via Trusted Publishing (OIDC) en er wordt automatisch een GitHub-release aangemaakt wanneer een versietag wordt gepusht.",
+        "fr": "Correction des anomalies détectées par le vérificateur de dépôt ioBroker : les dépendances `encryptedNative` et `protectedNative` ont été déplacées à la racine de `io-package.json` (elles étaient incorrectement imbriquées sous `common`), le fichier `common.docs` a été supprimé (redondant avec le fichier README en anglais), le rôle de `info.retention` a été corrigé, les dépendances minimales de `engines.node`/admin ont été augmentées et des points de rupture adaptatifs ont été ajoutés à tous les champs de configuration d'administration.\nAjout des fichiers `CHANGELOG_OLD.md` et `.github/dependabot.yml`, ainsi que du flux de travail de fusion automatique de dependabot.\nLes versions sont désormais automatiquement publiées sur npm via la publication sécurisée (OIDC) et la version GitHub est automatiquement créée lorsqu'une étiquette de version est ajoutée.",
+        "it": "Corretti i risultati del repo-checker ufficiale di ioBroker: spostati `encryptedNative`/`protectedNative` al livello superiore di `io-package.json` (erano annidati erroneamente sotto `common`), rimosso `common.docs` (ridondante con il README in inglese), corretto il ruolo di `info.retention`, aumentati i minimi di dipendenza di `engines.node`/admin, aggiunti breakpoint completamente responsivi a tutti i campi di configurazione dell'amministratore\nAggiunti `CHANGELOG_OLD.md`, `.github/dependabot.yml` e il flusso di lavoro di unione automatica di dependabot\nLe release ora vengono pubblicate automaticamente su npm tramite pubblicazione affidabile (OIDC) e creano automaticamente la release su GitHub quando viene effettuato un push di un tag di versione.",
+        "es": "Se corrigieron los hallazgos oficiales del verificador de repositorios de ioBroker: se movieron `encryptedNative`/`protectedNative` al nivel superior de `io-package.json` (estaban anidados incorrectamente bajo `common`), se eliminó `common.docs` (redundante con el README en inglés), se corrigió el rol de `info.retention`, se aumentaron los mínimos de dependencia de `engines.node`/admin, se agregaron puntos de interrupción totalmente responsivos a todos los campos de configuración de administración.\nSe agregaron `CHANGELOG_OLD.md`, `.github/dependabot.yml` y el flujo de trabajo de fusión automática de dependabot.\nAhora, las versiones se publican automáticamente en npm mediante publicación de confianza (OIDC) y se crea automáticamente la versión de GitHub cuando se agrega una etiqueta de versión.",
+        "pl": "Naprawiono oficjalne ustalenia programu do sprawdzania repozytoriów ioBroker: przeniesiono `encryptedNative`/`protectedNative` na najwyższy poziom `io-package.json` (były nieprawidłowo zagnieżdżone w `common`), usunięto `common.docs` (było zbędne w przypadku angielskiego pliku README), naprawiono rolę `info.retention`, zwiększono minimalne zależności w `engines.node`/admin, dodano w pełni responsywne punkty przerwania do wszystkich pól konfiguracji administratora\nDodano `CHANGELOG_OLD.md`, `.github/dependabot.yml` i automatyczny przepływ pracy scalania dependabot\nWydania są teraz automatycznie publikowane w npm za pośrednictwem zaufanego publikowania (OIDC) i automatycznie tworzone w GitHub po przesłaniu znacznika wersji",
+        "uk": "Виправлено офіційні недоліки перевірки репозиторіїв ioBroker: переміщено `encryptedNative`/`protectedNative` на верхній рівень `io-package.json` (були неправильно вкладені в `common`), видалено `common.docs` (надлишковий з англійським README), виправлено роль `info.retention`, збільшено мінімальні залежності `engines.node`/admin, додано повноцінні адаптивні точки зупинки до всіх полів конфігурації адміністратора.\nДодано `CHANGELOG_OLD.md`, `.github/dependabot.yml` та робочий процес автоматичного об'єднання dependabot\nРелізи тепер автоматично публікуються в npm через довірену публікацію (OIDC) та автоматично створюються на GitHub після надсилання тегу версії.",
+        "zh-cn": "修复了官方 ioBroker repo-checker 的发现：将 `encryptedNative`/`protectedNative` 移至 `io-package.json` 的顶层（之前错误地嵌套在 `common` 下），移除了 `common.docs`（与英文 README 重复），修复了 `info.retention` 的角色，提高了 `engines.node`/admin 依赖项的最低要求，并为所有 admin 配置字段添加了完全响应式断点。\n新增了 `CHANGELOG_OLD.md`、`.github/dependabot.yml` 和 dependabot 自动合并工作流\n现在，版本发布会自动通过可信发布（OIDC）发布到 npm，并在推送版本标签时自动创建 GitHub 发布版本。"
+      },
+      "0.4.1": {
+        "en": "English README, German docs/de split, adapter-checker compliance fixes",
+        "de": "Englisches README, deutsche docs/de-Aufteilung, Adapter-Checker-Korrekturen",
+        "ru": "Английский README, немецкая документация/разделение, исправления соответствия адаптера",
+        "pt": "README em inglês, documentos/de split em alemão, correções de conformidade do verificador de adaptador",
+        "nl": "Engelse README, Duitse docs/de split, conformiteitsoplossingen voor adapter-checker",
+        "fr": "README anglais, documents allemands/de split, correctifs de conformité du vérificateur d'adaptateur",
+        "it": "README inglese, divisione docs/de tedesco, correzioni di conformità del controllo dell'adattatore",
+        "es": "README en inglés, documentos alemanes/de split, correcciones de cumplimiento del verificador de adaptadores",
+        "pl": "Plik README w języku angielskim, dokumentacja w języku niemieckim/de split, poprawki dotyczące zgodności modułu sprawdzania adapterów",
+        "uk": "Англійська README, німецька docs/de split, виправлення відповідності адаптера",
+        "zh-cn": "英语自述文件、德语文档/de split、适配器检查器合规性修复"
+      },
+      "0.4.0": {
+        "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
+        "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon",
+        "ru": "Продвижение PromQL на стороне сервера, getHistory с несколькими идентификаторами,changeOnly/changesRelogInterval, проверка сохранения соединения, новый значок",
+        "pt": "Pushdown do lado do servidor PromQL, getHistory multi-id, changeOnly/changesRelogInterval, retenção no teste de conexão, novo ícone",
+        "nl": "PromQL pushdown op de server, multi-id getHistory, changeOnly/changesRelogInterval, retentie in verbindingstest, nieuw pictogram",
+        "fr": "Refoulement côté serveur PromQL, getHistory multi-id, changesOnly/changesRelogInterval, rétention dans le test de connexion, nouvelle icône",
+        "it": "Pushdown lato server PromQL, getHistory multi-id, changeOnly/changesRelogInterval, mantenimento nel test di connessione, nuova icona",
+        "es": "Pushdown del lado del servidor PromQL, getHistory de múltiples ID, cambiosOnly/changesRelogInterval, prueba de retención en la conexión, nuevo icono",
+        "pl": "PromQL pushdown po stronie serwera, getHistory z wieloma identyfikatorami, zmianyOnly/changesRelogInterval, test zachowania połączenia, nowa ikona",
+        "uk": "PromQL на стороні сервера, що повертається, getHistory з декількома ідентифікаторами, changesOnly/changesRelogInterval, утримання під час перевірки з’єднання, новий значок",
+        "zh-cn": "PromQL 服务器端下推、多 id getHistory、changesOnly/changesRelogInterval、连接测试中的保留、新图标"
+      }
     },
-    "native": {
-        "protocol": "http",
-        "host": "",
-        "port": 8428,
-        "useAuth": false,
-        "username": "",
-        "password": "",
-        "requestTimeout": 5000,
-        "writeInterval": 10,
-        "bufferMaxSize": 1000,
-        "defaultRound": "",
-        "defaultChangesMinDelta": "",
-        "defaultDebounceTime": "",
-        "defaultBlockTime": "",
-        "defaultIgnoreBelowNumber": "",
-        "defaultIgnoreAboveNumber": "",
-        "defaultIgnoreZero": false,
-        "defaultChangesOnly": false,
-        "defaultChangesRelogInterval": ""
+    "titleLang": {
+      "en": "VictoriaMetrics",
+      "de": "VictoriaMetrics",
+      "ru": "ВикторияМетрикс",
+      "pt": "VictoriaMetrics",
+      "nl": "VictoriaMetrics",
+      "fr": "VictoriaMetrics",
+      "it": "VictoriaMetrics",
+      "es": "VictoriaMétricas",
+      "pl": "VictoriaMetrics",
+      "uk": "ВікторіяМетрикс",
+      "zh-cn": "维多利亚指标"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "Device or service connected",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.retention",
-            "type": "state",
-            "common": {
-                "role": "text",
-                "name": {
-                    "en": "VictoriaMetrics retention (read-only)",
-                    "de": "VictoriaMetrics-Retention (nur lesend)"
-                },
-                "type": "string",
-                "read": true,
-                "write": false,
-                "def": ""
-            },
-            "native": {}
-        },
-        {
-            "_id": "cache",
-            "type": "meta",
-            "common": {
-                "name": "Puffer-Cache",
-                "type": "meta.folder"
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "Writes ioBroker datapoint history natively to VictoriaMetrics",
+      "de": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
+      "ru": "Записывает историю точек данных ioBroker нативно в VictoriaMetrics",
+      "pt": "Grava o histórico de pontos de dados do ioBroker nativamente no VictoriaMetrics",
+      "nl": "Schrijft ioBroker-datapuntgeschiedenis native naar VictoriaMetrics",
+      "fr": "Écrit nativement l'historique des points de données ioBroker dans VictoriaMetrics",
+      "it": "Scrive nativamente la cronologia dei punti dati ioBroker in VictoriaMetrics",
+      "es": "Escribe el historial de puntos de datos de ioBroker de forma nativa en VictoriaMetrics",
+      "pl": "Natywnie zapisuje historię punktów danych ioBroker w VictoriaMetrics",
+      "uk": "Записує історію точок даних ioBroker нативно у VictoriaMetrics",
+      "zh-cn": "将 ioBroker 数据点历史原生写入 VictoriaMetrics"
+    },
+    "authors": [
+      "SeaSpotter <seatowage@gmail.com>"
     ],
-    "encryptedNative": [
-        "password"
+    "keywords": [
+      "victoriametrics",
+      "history",
+      "prometheus",
+      "monitoring",
+      "zeitreihe"
     ],
-    "protectedNative": [
-        "password"
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "victoriametrics.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/seaspotter/ioBroker.victoriametrics/main/admin/victoriametrics.png",
+    "readme": "https://github.com/seaspotter/ioBroker.victoriametrics/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "storage",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "push",
+    "messagebox": true,
+    "getHistory": true,
+    "adminUI": {
+      "config": "json",
+      "custom": "json"
+    },
+    "adminTab": {
+      "link": "%protocol%://%host%:%port%/vmui/",
+      "name": {
+        "en": "VictoriaMetrics",
+        "de": "VictoriaMetrics"
+      },
+      "singleton": true
+    },
+    "supportCustoms": true,
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.20"
+      }
     ]
+  },
+  "native": {
+    "protocol": "http",
+    "host": "",
+    "port": 8428,
+    "useAuth": false,
+    "username": "",
+    "password": "",
+    "requestTimeout": 5000,
+    "writeInterval": 10,
+    "bufferMaxSize": 1000,
+    "defaultRound": "",
+    "defaultChangesMinDelta": "",
+    "defaultDebounceTime": "",
+    "defaultBlockTime": "",
+    "defaultIgnoreBelowNumber": "",
+    "defaultIgnoreAboveNumber": "",
+    "defaultIgnoreZero": false,
+    "defaultChangesOnly": false,
+    "defaultChangesRelogInterval": ""
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.retention",
+      "type": "state",
+      "common": {
+        "role": "text",
+        "name": {
+          "en": "VictoriaMetrics retention (read-only)",
+          "de": "VictoriaMetrics-Retention (nur lesend)"
+        },
+        "type": "string",
+        "read": true,
+        "write": false,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "cache",
+      "type": "meta",
+      "common": {
+        "name": "Puffer-Cache",
+        "type": "meta.folder"
+      },
+      "native": {}
+    }
+  ],
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ]
 }
