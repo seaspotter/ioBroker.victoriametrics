@@ -72,10 +72,12 @@ class Victoriametrics extends utils.Adapter {
         const health = await this.vmClient.testHealth(this.config);
         if (health.ok) {
             const retention = await this.vmClient.getRetention(this.config);
-            const retentionInfo = retention.ok && retention.retention ? ` (Retention: ${retention.retention})` : '';
+            const retentionValue = (retention.ok && retention.retention) || '';
+            const retentionInfo = retentionValue ? ` (Retention: ${retentionValue})` : '';
             this.log.info(
                 `VictoriaMetrics unter ${this.config.protocol}://${this.config.host}:${this.config.port} erreichbar${retentionInfo}`,
             );
+            await this.setState('info.retention', retentionValue, true);
         } else {
             this.log.warn(
                 `VictoriaMetrics beim Start nicht erreichbar (${health.error}) - Werte werden bis zur Wiederverbindung gepuffert`,
@@ -224,6 +226,9 @@ class Victoriametrics extends utils.Adapter {
         if (this._isBelowMinDelta(id, value, settings)) {
             return;
         }
+        if (this._isSkippedByChangesOnly(id, value, settings)) {
+            return;
+        }
         if (this._isBlockedByBlockTime(id, settings)) {
             return;
         }
@@ -329,6 +334,35 @@ class Victoriametrics extends utils.Adapter {
         }
         const last = this.lastValues.get(id);
         return last !== undefined && Math.abs(value - last) < minDelta;
+    }
+
+    /**
+     * Prüft changesOnly (Datenpunkt- oder instanzweiter Standardwert): schreibt einen Wert
+     * nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet. Ein unveränderter Wert
+     * wird trotzdem erneut geschrieben (relogged), sobald changesRelogInterval seit dem
+     * letzten Schreiben abgelaufen ist - so entstehen keine Lücken im Chart. Der allererste
+     * Wert eines Datenpunkts wird nie übersprungen.
+     *
+     * @param {string} id - Objekt-ID
+     * @param {number} value - Neuer (bereits gerundeter) Wert
+     * @param {{changesOnly?: boolean, changesRelogInterval?: string | number}} settings - Custom-Settings des Datenpunkts
+     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     */
+    _isSkippedByChangesOnly(id, value, settings) {
+        const changesOnly = settings.changesOnly !== undefined ? settings.changesOnly : this.config.defaultChangesOnly;
+        if (!changesOnly) {
+            return false;
+        }
+        const last = this.lastValues.get(id);
+        if (last === undefined || last !== value) {
+            return false;
+        }
+        const relogMs = this._resolveNumberSetting(settings, 'changesRelogInterval', 'defaultChangesRelogInterval');
+        if (relogMs === undefined || relogMs <= 0) {
+            return true;
+        }
+        const lastLogTime = this.lastLogTimes.get(id);
+        return lastLogTime !== undefined && Date.now() - lastLogTime < relogMs;
     }
 
     /**
@@ -536,7 +570,17 @@ class Victoriametrics extends utils.Adapter {
 
         const testCfg = { ...cfg, password: decodeURIComponent(cfg.password || '') };
         const result = await this.vmClient.testHealth(testCfg);
-        this.sendTo(obj.from, obj.command, { error: result.ok ? null : result.error }, obj.callback);
+        if (!result.ok) {
+            this.sendTo(obj.from, obj.command, { error: result.error }, obj.callback);
+            return;
+        }
+        const retention = await this.vmClient.getRetention(testCfg);
+        this.sendTo(
+            obj.from,
+            obj.command,
+            { result: 'ok', args: [(retention.ok && retention.retention) || '–'] },
+            obj.callback,
+        );
     }
 
     /**

@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "victoriametrics",
-        "version": "0.3.0",
+        "version": "0.4.0",
         "news": {
+            "0.4.0": {
+                "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
+                "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon"
+            },
             "0.3.0": {
                 "en": "VMUI sidebar link, instance-wide defaults, storeState/deleteAll/features messages, retention display",
                 "de": "VMUI-Sidebar-Link, instanzweite Standardwerte, storeState/deleteAll/features-Nachrichten, Retention-Anzeige"
@@ -69,7 +73,7 @@
             "custom": "json"
         },
         "adminTab": {
-            "link": "%native_protocol%://%native_host%:%native_port%/vmui/",
+            "link": "%protocol%://%host%:%port%/vmui/",
             "name": {
                 "en": "VictoriaMetrics",
                 "de": "VictoriaMetrics"
@@ -106,7 +110,9 @@
         "defaultBlockTime": "",
         "defaultIgnoreBelowNumber": "",
         "defaultIgnoreAboveNumber": "",
-        "defaultIgnoreZero": false
+        "defaultIgnoreZero": false,
+        "defaultChangesOnly": false,
+        "defaultChangesRelogInterval": ""
     },
     "objects": [],
     "instanceObjects": [
@@ -128,6 +134,22 @@
                 "read": true,
                 "write": false,
                 "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.retention",
+            "type": "state",
+            "common": {
+                "role": "value",
+                "name": {
+                    "en": "VictoriaMetrics retention (read-only)",
+                    "de": "VictoriaMetrics-Retention (nur lesend)"
+                },
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
             },
             "native": {}
         },

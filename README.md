@@ -15,14 +15,13 @@
 Schreibt ioBroker-Datenpunkt-Historie nativ in [VictoriaMetrics](https://victoriametrics.com/) – über
 dessen [JSON-Lines-Import-API](https://docs.victoriametrics.com/#how-to-import-data-in-json-line-format),
 mit echten Prometheus-Labels statt Feld-Namens-Suffixen (wie sie z.B. beim Schreiben über den
-InfluxDB-Kompatibilitätslayer entstehen, etwa `Batterieleistung_value`).
+InfluxDB-Kompatibilitätslayer entstehen, etwa `Wohnzimmer_Temperatur_value`).
 
-**Hinweis:** Phase 1 (Schreibpfad) ist fertig und produktiv im Einsatz. Phase 2
-(`getHistory()`-Lesezugriff, damit vis-Chart-Widgets direkt gegen diesen Adapter abfragen
-können) existiert als **Proof-of-Concept** – siehe [Lesepfad](#lesepfad-phase-2-proof-of-concept)
-unten für den aktuellen Stand und bekannte Einschränkungen. Für Visualisierung ohne vis
-(z.B. Grafana) weiterhin direkt gegen VictoriaMetrics per PromQL abfragen. Der Adapter ist
-privat und (noch) nicht im offiziellen ioBroker-Repository gelistet.
+Schreibt Datenpunkt-Änderungen gepuffert an VictoriaMetrics und beantwortet `getHistory()`-Anfragen
+(damit vis-Chart-Widgets direkt gegen diesen Adapter abfragen können) – siehe [Lesepfad](#lesepfad)
+unten für Details und bekannte Einschränkungen. Für Visualisierung ohne vis (z.B. Grafana)
+weiterhin direkt gegen VictoriaMetrics per PromQL abfragen. Der Adapter ist privat und (noch)
+nicht im offiziellen ioBroker-Repository gelistet.
 
 ## Voraussetzungen
 
@@ -90,7 +89,8 @@ iobroker url https://github.com/seaspotter/iobroker.victoriametrics
 | Timeout (ms) | HTTP-Request-Timeout |
 
 Über den Button **"Verbindung testen"** wird der `/health`-Endpunkt von VictoriaMetrics mit den
-aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft.
+aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft; bei Erfolg zeigt die Meldung
+zusätzlich die aktuell konfigurierte Retention an.
 
 Beim Start des Adapters wird zusätzlich die aktuell auf dem VM-Server konfigurierte Retention
 geloggt (`VictoriaMetrics unter ... erreichbar (Retention: 100y)`) – reines Anzeigen, siehe
@@ -124,10 +124,15 @@ auswählen und über den Schalter **"Aktiviert"** einschalten.
 | Metrik-Name (optional) | Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (`__name__`), siehe unten |
 | Runden auf Nachkommastellen (optional) | Rundet den Wert vor dem Schreiben; leer lassen für keine Rundung |
 | Minimale Änderung (optional) | Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben; leer lassen für keine Filterung |
+| Nur Änderungen aufzeichnen | Schreibt einen Wert nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet |
+| Relog-Intervall (ms, optional) | Nur bei aktiviertem "Nur Änderungen aufzeichnen": schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen |
 
 Entprellzeit und Blockzeit sind kombinierbar mit den übrigen Filtern: Entprellzeit
 verzögert das Schreiben, bis der Wert eine Zeit lang stabil war; Blockzeit begrenzt,
 wie oft ein Datenpunkt maximal geschrieben wird, unabhängig davon, ob er sich ändert.
+"Nur Änderungen aufzeichnen" ist unabhängig von "Minimale Änderung" nutzbar: Erstere schreibt
+nur bei einer *exakten* Wertänderung (mit optionalem periodischem Relog), Letztere filtert
+Änderungen unterhalb eines *Schwellenwerts*.
 
 ### Tab "Standardwerte"
 
@@ -148,8 +153,8 @@ Der gewählte Name wird anschließend normalisiert: kleingeschrieben, `.` wird z
 ungültiger Zeichen wird zu einem einzelnen `_` zusammengefasst, führende/trailing `_` entfernt,
 und falls das Ergebnis mit einer Ziffer beginnt, wird ein `_` vorangestellt.
 
-Beispiel: `javascript.0.PV Batterieleistung` → `javascript_0_pv_batterieleistung`. Für einen
-kurzen, sprechenden Namen wie `idm_aussentemperatur` das Feld **Metrik-Name** verwenden.
+Beispiel: `javascript.0.Room Temperature` → `javascript_0_room_temperature`. Für einen
+kurzen, sprechenden Namen wie `room_temperature` das Feld **Metrik-Name** verwenden.
 
 ## Datentyp-Behandlung
 
@@ -180,23 +185,32 @@ Zusätzlich wird der Puffer beim sauberen Beenden des Adapters sowie (gedrosselt
 pro Minute) nach fehlgeschlagenen Schreibversuchen persistiert, sodass auch ein harter Absturz
 (z.B. Container-Neustart) im normalen Rahmen keine Daten verliert.
 
-## Lesepfad (Phase 2, Proof-of-Concept)
+## Lesepfad
 
 Der Adapter beantwortet `getHistory()`-Anfragen (das, was vis-Chart-Widgets aufrufen), indem
-er rohe Datenpunkte der angefragten Metrik aus VictoriaMetrics liest (`/api/v1/export`) und sie
-an die geteilte [`@iobroker/aggregate`](https://github.com/ioBroker/aggregate)-Bibliothek
-übergibt – dieselbe Bibliothek, die `iobroker.influxdb`, `iobroker.sql` und `iobroker.history`
-für Bucket-Aggregation (Durchschnitt/Min/Max/Summe/Anzahl/Perzentil/...), Lücken-Behandlung und
+er Datenpunkte der angefragten Metrik aus VictoriaMetrics liest und sie an die geteilte
+[`@iobroker/aggregate`](https://github.com/ioBroker/aggregate)-Bibliothek übergibt – dieselbe
+Bibliothek, die `iobroker.influxdb`, `iobroker.sql` und `iobroker.history` für
+Bucket-Aggregation (Durchschnitt/Min/Max/Summe/Anzahl/Perzentil/...), Lücken-Behandlung und
 Rand-Interpolation verwenden. Dadurch funktionieren grundsätzlich alle Standard-Aggregationstypen,
 ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
 
-**Bekannte Einschränkungen des POC:**
-- Nur einzelne `id`-Anfragen (kein `id: '*'` für mehrere Datenpunkte gleichzeitig)
-- Kein serverseitiges PromQL-Pushdown (`avg_over_time` etc.) – die Aggregation läuft
-  vollständig in JS auf den rohen, unaggregierten Werten; bei sehr langen Zeiträumen mit sehr
-  vielen Rohpunkten ist das langsamer als eine native VM-Aggregation (spätere Optimierung)
-- Antworten enthalten kein `ack`/`q`/`from` – Phase 1 speichert diese Felder gar nicht erst in
-  VictoriaMetrics
+**Serverseitiges Pushdown:** für die Aggregationsmethoden `average`, `min`, `max`, `total` und
+`count` mit bekanntem Zeit-`step` rechnet VictoriaMetrics selbst per PromQL (`avg_over_time`,
+`min_over_time`, `max_over_time`, `sum_over_time`, `count_over_time`) – der Adapter überträgt
+dann nur die fertigen Bucket-Werte statt aller Rohpunkte. Für `onchange`/`none`/`minmax` sowie
+`percentile`/`quantile`/`integral` (kein direktes PromQL-Äquivalent) und immer dann, wenn das
+Pushdown fehlschlägt, wird transparent auf den Rohdaten-Pfad (`/api/v1/export` + JS-seitige
+Aggregation) zurückgefallen.
+
+**`id: '*'`:** liefert die letzten Rohwerte über alle *aktuell in Admin aktivierten*
+Datenpunkte hinweg (nicht verwaiste Metriken zwischenzeitlich deaktivierter Datenpunkte),
+jeweils mit `id`-Feld pro Punkt. Aggregation wird hierfür nicht unterstützt (ergibt über
+verschiedene Metriken hinweg keinen Sinn) – es werden immer Rohwerte zurückgegeben.
+
+**Weitere bekannte Einschränkungen:**
+- Antworten enthalten kein `ack`/`q`/`from` – der Adapter speichert diese Felder gar nicht erst
+  in VictoriaMetrics
 - Kein Vorab-Flush noch nicht geschriebener, gepufferter Werte vor einer Abfrage (anders als
   `iobroker.influxdb`) – ein `getHistory()`-Aufruf direkt nach einer Zustandsänderung sieht den
   neuesten Wert ggf. erst nach dem nächsten Schreibintervall
@@ -206,7 +220,7 @@ ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
 ```javascript
 // Letzte 50 Rohwerte
 sendTo('victoriametrics.0', 'getHistory', {
-    id: 'javascript.0.PV_Batterieleistung',
+    id: 'javascript.0.exampleValue',
     options: {
         end: Date.now(),
         count: 50,
@@ -221,7 +235,7 @@ sendTo('victoriametrics.0', 'getHistory', {
 // Stundenmittelwert der letzten 24h
 var end = Date.now();
 sendTo('victoriametrics.0', 'getHistory', {
-    id: 'javascript.0.PV_Batterieleistung',
+    id: 'javascript.0.exampleValue',
     options: {
         start: end - 24 * 3600000,
         end: end,
@@ -231,11 +245,25 @@ sendTo('victoriametrics.0', 'getHistory', {
 }, function (result) {
     console.log(JSON.stringify(result.result));
 });
+
+// Letzte 20 Rohwerte über alle aktivierten Datenpunkte hinweg
+sendTo('victoriametrics.0', 'getHistory', {
+    id: '*',
+    options: {
+        end: Date.now(),
+        count: 20,
+        addId: true,
+    }
+}, function (result) {
+    for (var i = 0; i < result.result.length; i++) {
+        console.log(result.result[i].id + ' ' + result.result[i].val);
+    }
+});
 ```
 
 Unterstützte `options`-Felder und `aggregate`-Werte entsprechen dem ioBroker-Standard (siehe
 [`iobroker.history`-Dokumentation](https://github.com/ioBroker/ioBroker.history#access-values-from-javascript-adapter)
-für die vollständige Referenz) – mit den oben genannten Einschränkungen dieses POC.
+für die vollständige Referenz) – mit den oben genannten Einschränkungen.
 
 ## Datenmanagement / Skript-Schnittstellen
 
@@ -259,14 +287,14 @@ Schreibt einen oder mehrere historische Punkte, z.B. um alte Historie aus einer 
 
 ```javascript
 sendTo('victoriametrics.0', 'storeState', {
-    id: 'javascript.0.PV_Batterieleistung',
+    id: 'javascript.0.exampleValue',
     state: { ts: 1690000000000, val: 512.3 },
     rules: true, // Rundung + Schwellenwert-/Nullwert-Filter anwenden (siehe unten)
 }, result => console.log(JSON.stringify(result)));
 
 // auch als Batch für dieselbe id:
 sendTo('victoriametrics.0', 'storeState', {
-    id: 'javascript.0.PV_Batterieleistung',
+    id: 'javascript.0.exampleValue',
     state: [
         { ts: 1690000000000, val: 512.3 },
         { ts: 1690000060000, val: 498.1 },
@@ -292,7 +320,7 @@ Teilfehlern liefert die Antwort `{error, errors: [...], successCount}`, bei voll
 Löscht die komplette in VictoriaMetrics gespeicherte Historie eines Datenpunkts:
 
 ```javascript
-sendTo('victoriametrics.0', 'deleteAll', { id: 'javascript.0.PV_Batterieleistung' },
+sendTo('victoriametrics.0', 'deleteAll', { id: 'javascript.0.exampleValue' },
     result => console.log(JSON.stringify(result)));
 
 // auch als Array mehrerer ids:
@@ -314,10 +342,15 @@ das wäre überraschend und gefährlich, deshalb absichtlich weggelassen.
 VictoriaMetrics' Retention ist ein **serverseitiges Start-Flag** (`-retentionPeriod`) des
 VM-Prozesses selbst, nicht per HTTP-API zur Laufzeit änderbar (anders als z.B. InfluxDB, wo der
 Adapter per `ALTER RETENTION POLICY` aktiv einen Wert setzen kann). Dieser Adapter zeigt die
-aktuell konfigurierte Retention deshalb nur lesend im Log an (siehe oben, `/flags`-Endpunkt) –
-zum Ändern muss VM mit einem anderen `-retentionPeriod`-Wert neu gestartet werden (bei Docker:
-den `--retentionPeriod=...`-Parameter im `docker run`/`docker-compose.yml` ändern und den
-Container neu erstellen).
+aktuell konfigurierte Retention deshalb nur lesend an – zum Ändern muss VM mit einem anderen
+`-retentionPeriod`-Wert neu gestartet werden (bei Docker: den `--retentionPeriod=...`-Parameter
+im `docker run`/`docker-compose.yml` ändern und den Container neu erstellen).
+
+Sichtbar ist die aktuelle Retention an drei Stellen (alle read-only, beim Adapterstart einmalig
+vom `/flags`-Endpunkt gelesen):
+- Datenpunkt **`<instance>.info.retention`** (String, z.B. `"100y"`) – für Skripte/VIS
+- Log-Eintrag beim Start (`VictoriaMetrics unter ... erreichbar (Retention: 100y)`)
+- Erfolgs-Meldung des Buttons **"Verbindung testen"** im Tab "Verbindung"
 
 **Details:**
 - **Standard-Retention**, falls `-retentionPeriod` nicht gesetzt ist: **1 Monat (31 Tage)**.
@@ -353,6 +386,14 @@ Container neu erstellen).
 	### **WORK IN PROGRESS**
 -->
 
+### 0.4.0 (2026-08-28)
+* (SeaSpotter) Fix: VMUI-Sidebar-Link warf einen `URIError` beim Anklicken (`%native_protocol%` wurde nicht ersetzt) – korrekte Platzhalter-Syntax laut Admin-Quellcode ist `%protocol%`/`%host%`/`%port%` ohne `native_`-Präfix
+* (SeaSpotter) Serverseitiges PromQL-Pushdown für `getHistory` bei den Aggregationsmethoden average/min/max/total/count (`avg_over_time` etc.) statt Rohdaten-Export + JS-Aggregation
+* (SeaSpotter) `getHistory` mit `id: '*'`: letzte Rohwerte über alle aktuell aktivierten Datenpunkte hinweg
+* (SeaSpotter) Neue Pro-Datenpunkt-/Standardwert-Filter `changesOnly` (nur Änderungen aufzeichnen) und `changesRelogInterval` (periodisches Relog unveränderter Werte)
+* (SeaSpotter) Retention jetzt auch als eigener Datenpunkt `info.retention` und im Erfolgs-Alert von "Verbindung testen" sichtbar, nicht nur im Log
+* (SeaSpotter) Eigenes Adapter-Icon
+
 ### 0.3.0 (2026-08-28)
 * (SeaSpotter) VMUI-Sidebar-Link in der Admin-Seitenleiste (`common.adminTab`, analog Node-RED/Zigbee2MQTT)
 * (SeaSpotter) Instanzweite Standardwerte für alle Historie-Filter (round/changesMinDelta/debounceTime/blockTime/ignoreBelow-/AboveNumber/ignoreZero) – Datenpunkt-eigene Werte überschreiben weiterhin den Standard
@@ -361,10 +402,10 @@ Container neu erstellen).
 * (SeaSpotter) `round`, `changesMinDelta`, `debounceTime`, `blockTime`, `ignoreBelowNumber`/`ignoreAboveNumber`, `ignoreZero` als Pro-Datenpunkt-Filter ergänzt
 
 ### 0.2.0 (2026-08-28)
-* (SeaSpotter) Phase 2 Proof-of-Concept: `getHistory()`-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek
+* (SeaSpotter) `getHistory()`-Lesepfad über die geteilte `@iobroker/aggregate`-Bibliothek
 
 ### 0.1.0 (2026-08-28)
-* (SeaSpotter) Phase 1: Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API), Verbindungstest, Puffer/Retry, Historie-Tab-Integration
+* (SeaSpotter) Schreibpfad nach VictoriaMetrics (native JSON-Lines-Import-API), Verbindungstest, Puffer/Retry, Historie-Tab-Integration
 
 ## License
 MIT License

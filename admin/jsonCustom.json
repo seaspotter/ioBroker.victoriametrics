@@ -76,6 +76,24 @@
             "sm": 6,
             "md": 4,
             "defaultFunc": "instanceObj.native.defaultChangesMinDelta"
+        },
+        "changesOnly": {
+            "type": "checkbox",
+            "label": "Nur Änderungen aufzeichnen",
+            "help": "Schreibt einen Wert nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet.",
+            "hidden": "!data.enabled",
+            "newLine": true,
+            "defaultFunc": "instanceObj.native.defaultChangesOnly"
+        },
+        "changesRelogInterval": {
+            "type": "number",
+            "label": "Relog-Intervall (ms, optional)",
+            "help": "Schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen. Nur wirksam bei aktiviertem 'Nur Änderungen aufzeichnen'.",
+            "hidden": "!data.enabled || !data.changesOnly",
+            "min": 0,
+            "sm": 6,
+            "md": 4,
+            "defaultFunc": "instanceObj.native.defaultChangesRelogInterval"
         }
     }
 }

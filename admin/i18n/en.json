@@ -11,6 +11,7 @@
     "Timeout (ms)": "Timeout (ms)",
     "Verbindung testen": "Test connection",
     "Zeitüberschreitung bei der Verbindung": "Connection timeout",
+    "Verbindung erfolgreich (Retention: %s)": "Connection successful (retention: %s)",
     "Schreibintervall (Sekunden)": "Write interval (seconds)",
     "Wie oft gepufferte Werte gesammelt an VictoriaMetrics gesendet werden": "How often buffered values are sent to VictoriaMetrics in a batch",
     "Max. Puffergröße (Punkte)": "Max. buffer size (points)",
@@ -29,5 +30,9 @@
     "Ignoriere Werte größer als (optional)": "Ignore values above (optional)",
     "Ignoriere Nullwerte (0)": "Ignore zero values (0)",
     "Standardwerte": "Defaults",
-    "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.": "Apply to all datapoints that don't set their own value in the Historie tab."
+    "Gelten für alle Datenpunkte, die im Historie-Tab kein eigenes Feld gesetzt haben.": "Apply to all datapoints that don't set their own value in the Historie tab.",
+    "Nur Änderungen aufzeichnen": "Log changes only",
+    "Schreibt einen Wert nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet.": "Only writes a value if it differs from the last written value.",
+    "Relog-Intervall (ms, optional)": "Relog interval (ms, optional)",
+    "Schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen. Nur wirksam bei aktiviertem 'Nur Änderungen aufzeichnen'.": "Writes an unchanged value again at the latest after this time, so charts don't show gaps. Only effective when 'Log changes only' is enabled."
 }

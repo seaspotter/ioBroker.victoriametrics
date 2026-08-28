@@ -93,6 +93,9 @@
                     "lg": 3,
                     "error": {
                         "connect timeout": "Zeitüberschreitung bei der Verbindung"
+                    },
+                    "result": {
+                        "ok": "Verbindung erfolgreich (Retention: %s)"
                     }
                 }
             }
@@ -177,6 +180,18 @@
                 "defaultChangesMinDelta": {
                     "type": "number",
                     "label": "Minimale Änderung (optional)",
+                    "min": 0,
+                    "sm": 6,
+                    "md": 4
+                },
+                "defaultChangesOnly": {
+                    "type": "checkbox",
+                    "label": "Nur Änderungen aufzeichnen",
+                    "newLine": true
+                },
+                "defaultChangesRelogInterval": {
+                    "type": "number",
+                    "label": "Relog-Intervall (ms, optional)",
                     "min": 0,
                     "sm": 6,
                     "md": 4
