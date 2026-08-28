@@ -59,9 +59,17 @@ auswählen und über den Schalter **"Aktiviert"** einschalten.
 
 | Feld | Beschreibung |
 |------|--------------|
+| Entprellzeit (ms, optional) | Protokolliert den Wert erst, wenn er für die angegebene Zeit unverändert bleibt (wartet auf einen "ruhigen" Zustand vor dem Schreiben) |
+| Blockzeit (ms, optional) | Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert (Rate-Limit) |
+| Ignoriere Werte kleiner/größer als (optional) | Schwellenwert-Filter, z. B. um offensichtliche Sensor-Ausreißer zu verwerfen |
+| Ignoriere Nullwerte (0) | Überspringt Werte, die exakt 0 sind |
 | Metrik-Name (optional) | Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (`__name__`), siehe unten |
 | Runden auf Nachkommastellen (optional) | Rundet den Wert vor dem Schreiben; leer lassen für keine Rundung |
 | Minimale Änderung (optional) | Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben; leer lassen für keine Filterung |
+
+Entprellzeit und Blockzeit sind kombinierbar mit den übrigen Filtern: Entprellzeit
+verzögert das Schreiben, bis der Wert eine Zeit lang stabil war; Blockzeit begrenzt,
+wie oft ein Datenpunkt maximal geschrieben wird, unabhängig davon, ob er sich ändert.
 
 ## Metrik-Namensbildung
 

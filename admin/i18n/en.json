@@ -20,5 +20,12 @@
     "Runden auf Nachkommastellen (optional)": "Round to decimal places (optional)",
     "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.": "Rounds the value to the given number of decimal places before writing. Leave empty for no rounding.",
     "Minimale Änderung (optional)": "Minimum change (optional)",
-    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Values that differ from the last written value by less than this amount are not written. Leave empty for no filtering."
+    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Values that differ from the last written value by less than this amount are not written. Leave empty for no filtering.",
+    "Entprellzeit (ms, optional)": "Debounce time (ms, optional)",
+    "Protokolliert den Wert erst, wenn er für die angegebene Zeit unverändert bleibt. Leer lassen für sofortiges Schreiben.": "Only logs the value once it has stayed unchanged for the given time. Leave empty to write immediately.",
+    "Blockzeit (ms, optional)": "Block time (ms, optional)",
+    "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.": "Ignores new values for the given time after the last written value.",
+    "Ignoriere Werte kleiner als (optional)": "Ignore values below (optional)",
+    "Ignoriere Werte größer als (optional)": "Ignore values above (optional)",
+    "Ignoriere Nullwerte (0)": "Ignore zero values (0)"
 }

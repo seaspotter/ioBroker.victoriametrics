@@ -20,5 +20,12 @@
     "Runden auf Nachkommastellen (optional)": "Runden auf Nachkommastellen (optional)",
     "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.": "Rundet den Wert vor dem Schreiben auf die angegebene Anzahl Nachkommastellen. Leer lassen für keine Rundung.",
     "Minimale Änderung (optional)": "Minimale Änderung (optional)",
-    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung."
+    "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.": "Werte, die sich vom zuletzt geschriebenen Wert um weniger als diesen Betrag unterscheiden, werden nicht geschrieben. Leer lassen für keine Filterung.",
+    "Entprellzeit (ms, optional)": "Entprellzeit (ms, optional)",
+    "Protokolliert den Wert erst, wenn er für die angegebene Zeit unverändert bleibt. Leer lassen für sofortiges Schreiben.": "Protokolliert den Wert erst, wenn er für die angegebene Zeit unverändert bleibt. Leer lassen für sofortiges Schreiben.",
+    "Blockzeit (ms, optional)": "Blockzeit (ms, optional)",
+    "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.": "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.",
+    "Ignoriere Werte kleiner als (optional)": "Ignoriere Werte kleiner als (optional)",
+    "Ignoriere Werte größer als (optional)": "Ignoriere Werte größer als (optional)",
+    "Ignoriere Nullwerte (0)": "Ignoriere Nullwerte (0)"
 }

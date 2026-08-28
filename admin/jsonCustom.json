@@ -2,6 +2,46 @@
     "i18n": true,
     "type": "panel",
     "items": {
+        "debounceTime": {
+            "type": "number",
+            "label": "Entprellzeit (ms, optional)",
+            "help": "Protokolliert den Wert erst, wenn er für die angegebene Zeit unverändert bleibt. Leer lassen für sofortiges Schreiben.",
+            "hidden": "!data.enabled",
+            "newLine": true,
+            "min": 0,
+            "sm": 6,
+            "md": 4
+        },
+        "blockTime": {
+            "type": "number",
+            "label": "Blockzeit (ms, optional)",
+            "help": "Ignoriert neue Werte für die angegebene Zeit nach dem zuletzt geschriebenen Wert.",
+            "hidden": "!data.enabled",
+            "min": 0,
+            "sm": 6,
+            "md": 4
+        },
+        "ignoreBelowNumber": {
+            "type": "number",
+            "label": "Ignoriere Werte kleiner als (optional)",
+            "hidden": "!data.enabled",
+            "newLine": true,
+            "sm": 6,
+            "md": 4
+        },
+        "ignoreAboveNumber": {
+            "type": "number",
+            "label": "Ignoriere Werte größer als (optional)",
+            "hidden": "!data.enabled",
+            "sm": 6,
+            "md": 4
+        },
+        "ignoreZero": {
+            "type": "checkbox",
+            "label": "Ignoriere Nullwerte (0)",
+            "hidden": "!data.enabled",
+            "newLine": true
+        },
         "aliasId": {
             "type": "text",
             "label": "Metrik-Name (optional)",

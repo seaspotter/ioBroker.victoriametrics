@@ -6,6 +6,21 @@ const metricName = require('./lib/metricName');
 const { VmClient } = require('./lib/vmClient');
 const { SeriesBuffer } = require('./lib/buffer');
 
+/**
+ * Parst ein optionales, aus dem Admin-UI kommendes Zahlenfeld (kann Zahl,
+ * numerischer String, leerer String oder undefined sein).
+ *
+ * @param {string | number | undefined | null} raw - Roher Feldwert
+ * @returns {number | undefined} Zahl oder undefined, wenn nicht gesetzt/ungültig
+ */
+function parseOptionalNumber(raw) {
+    if (raw === undefined || raw === '' || raw === null) {
+        return undefined;
+    }
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : undefined;
+}
+
 class Victoriametrics extends utils.Adapter {
     /**
      * @param {Partial<utils.AdapterOptions>} [options] - Adapter options
@@ -22,6 +37,10 @@ class Victoriametrics extends utils.Adapter {
         this.objectCache = new Map();
         /** ID -> zuletzt geschriebener Wert (für changesMinDelta) */
         this.lastValues = new Map();
+        /** ID -> Zeitpunkt (Date.now()) des zuletzt geschriebenen Werts (für blockTime) */
+        this.lastLogTimes = new Map();
+        /** ID -> aktiver Entprellungs-Timer (für debounceTime) */
+        this.debounceTimers = new Map();
         /** Fehlerzähler pro Punkt-ID */
         this.errorPoints = {};
         this.subscribedAll = false;
@@ -129,6 +148,12 @@ class Victoriametrics extends utils.Adapter {
             this.enabledPoints.delete(id);
             this.objectCache.delete(id);
             this.lastValues.delete(id);
+            this.lastLogTimes.delete(id);
+            const pendingDebounce = this.debounceTimers.get(id);
+            if (pendingDebounce) {
+                this.clearTimeout(pendingDebounce);
+                this.debounceTimers.delete(id);
+            }
             if (!this.subscribedAll) {
                 this.unsubscribeForeignStates(id);
             }
@@ -150,17 +175,57 @@ class Victoriametrics extends utils.Adapter {
             return;
         }
 
-        const common = this.objectCache.get(id) || {};
-        let value = this._convertValue(state.val, id);
-        if (value === null) {
+        const debounceMs = parseOptionalNumber(settings.debounceTime);
+        if (debounceMs !== undefined && debounceMs > 0) {
+            const pending = this.debounceTimers.get(id);
+            if (pending) {
+                this.clearTimeout(pending);
+            }
+            const timer = this.setTimeout(() => {
+                this.debounceTimers.delete(id);
+                this._processPoint(id, state, settings);
+            }, debounceMs);
+            this.debounceTimers.set(id, timer);
             return;
         }
-        value = this._applyRounding(value, settings);
+
+        this._processPoint(id, state, settings);
+    }
+
+    /**
+     * Wendet Schwellenwert-/Nullwert-/Rundungs-/Änderungs-/Rate-Limit-Filter an und
+     * puffert den Punkt, falls er nicht herausgefiltert wird. Wird entweder direkt
+     * aus onStateChange oder verzögert nach Ablauf der Entprellzeit aufgerufen.
+     *
+     * @param {string} id - State-ID
+     * @param {ioBroker.State} state - Zustand zum Zeitpunkt der (ggf. entprellten) Änderung
+     * @param {object} settings - Custom-Settings des Datenpunkts
+     */
+    _processPoint(id, state, settings) {
+        const common = this.objectCache.get(id) || {};
+        const converted = this._convertValue(state.val, id);
+        if (converted === null) {
+            return;
+        }
+
+        if (this._isOutsideThreshold(converted, settings)) {
+            return;
+        }
+        if (this._isIgnoredZero(converted, settings)) {
+            return;
+        }
+
+        const value = this._applyRounding(converted, settings);
 
         if (this._isBelowMinDelta(id, value, settings)) {
             return;
         }
+        if (this._isBlockedByBlockTime(id, settings)) {
+            return;
+        }
+
         this.lastValues.set(id, value);
+        this.lastLogTimes.set(id, Date.now());
 
         /** @type {Record<string, string>} */
         const labels = {};
@@ -178,6 +243,33 @@ class Victoriametrics extends utils.Adapter {
     }
 
     /**
+     * Prüft die Schwellenwerte ignoreBelowNumber/ignoreAboveNumber.
+     *
+     * @param {number} value - Umgewandelter Zahlenwert
+     * @param {{ignoreBelowNumber?: string | number, ignoreAboveNumber?: string | number}} settings - Custom-Settings des Datenpunkts
+     * @returns {boolean} true, wenn der Wert außerhalb des erlaubten Bereichs liegt
+     */
+    _isOutsideThreshold(value, settings) {
+        const below = parseOptionalNumber(settings.ignoreBelowNumber);
+        if (below !== undefined && value < below) {
+            return true;
+        }
+        const above = parseOptionalNumber(settings.ignoreAboveNumber);
+        return above !== undefined && value > above;
+    }
+
+    /**
+     * Prüft, ob Nullwerte für diesen Datenpunkt ignoriert werden sollen (ignoreZero).
+     *
+     * @param {number} value - Umgewandelter Zahlenwert
+     * @param {{ignoreZero?: boolean}} settings - Custom-Settings des Datenpunkts
+     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     */
+    _isIgnoredZero(value, settings) {
+        return !!settings.ignoreZero && value === 0;
+    }
+
+    /**
      * Rundet den Wert auf die im Historie-Tab konfigurierte Anzahl Nachkommastellen,
      * sofern gesetzt.
      *
@@ -186,11 +278,8 @@ class Victoriametrics extends utils.Adapter {
      * @returns {number} Ggf. gerundeter Wert
      */
     _applyRounding(value, settings) {
-        if (settings.round === undefined || settings.round === '' || settings.round === null) {
-            return value;
-        }
-        const decimals = Number(settings.round);
-        if (!Number.isFinite(decimals) || decimals < 0) {
+        const decimals = parseOptionalNumber(settings.round);
+        if (decimals === undefined || decimals < 0) {
             return value;
         }
         const factor = 10 ** decimals;
@@ -209,19 +298,29 @@ class Victoriametrics extends utils.Adapter {
      * @returns {boolean} true, wenn der Wert übersprungen werden soll
      */
     _isBelowMinDelta(id, value, settings) {
-        if (
-            settings.changesMinDelta === undefined ||
-            settings.changesMinDelta === '' ||
-            settings.changesMinDelta === null
-        ) {
-            return false;
-        }
-        const minDelta = Number(settings.changesMinDelta);
-        if (!Number.isFinite(minDelta) || minDelta <= 0) {
+        const minDelta = parseOptionalNumber(settings.changesMinDelta);
+        if (minDelta === undefined || minDelta <= 0) {
             return false;
         }
         const last = this.lastValues.get(id);
         return last !== undefined && Math.abs(value - last) < minDelta;
+    }
+
+    /**
+     * Prüft die Blockzeit (blockTime): ignoriert neue Werte für die konfigurierte
+     * Zeitspanne nach dem zuletzt geschriebenen Wert dieses Datenpunkts.
+     *
+     * @param {string} id - Objekt-ID
+     * @param {{blockTime?: string | number}} settings - Custom-Settings des Datenpunkts
+     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     */
+    _isBlockedByBlockTime(id, settings) {
+        const blockMs = parseOptionalNumber(settings.blockTime);
+        if (blockMs === undefined || blockMs <= 0) {
+            return false;
+        }
+        const last = this.lastLogTimes.get(id);
+        return last !== undefined && Date.now() - last < blockMs;
     }
 
     /**
