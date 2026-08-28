@@ -2,11 +2,6 @@
     "i18n": true,
     "type": "panel",
     "items": {
-        "enabled": {
-            "type": "checkbox",
-            "label": "In VictoriaMetrics historisieren",
-            "newLine": true
-        },
         "aliasId": {
             "type": "text",
             "label": "Metrik-Name (optional)",

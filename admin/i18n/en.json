@@ -15,7 +15,6 @@
     "Wie oft gepufferte Werte gesammelt an VictoriaMetrics gesendet werden": "How often buffered values are sent to VictoriaMetrics in a batch",
     "Max. Puffergröße (Punkte)": "Max. buffer size (points)",
     "Löst bei Erreichen einen sofortigen Schreibvorgang aus, unabhängig vom Schreibintervall": "Triggers an immediate write when reached, independent of the write interval",
-    "In VictoriaMetrics historisieren": "Log history to VictoriaMetrics",
     "Metrik-Name (optional)": "Metric name (optional)",
     "Überschreibt die automatisch aus der Objekt-ID abgeleitete Metrik (__name__). Leer lassen für Standardableitung.": "Overrides the metric name (__name__) automatically derived from the object ID. Leave empty for the default derivation."
 }

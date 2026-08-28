@@ -55,7 +55,7 @@ aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft.
 ### Datenpunkte historisieren
 
 Im Objektbaum bei jedem gewünschten Datenpunkt den Tab **"Historie"** öffnen, diesen Adapter
-auswählen und "In VictoriaMetrics historisieren" aktivieren. Optional kann im Feld
+auswählen und über den Schalter **"Aktiviert"** einschalten. Optional kann im Feld
 **"Metrik-Name"** ein eigener Name vergeben werden, der die automatische Ableitung überschreibt
 (siehe unten).
 
