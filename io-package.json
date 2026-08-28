@@ -51,8 +51,7 @@
             "history",
             "prometheus",
             "monitoring",
-            "zeitreihe",
-            "ioBroker"
+            "zeitreihe"
         ],
         "licenseInformation": {
             "type": "free",
