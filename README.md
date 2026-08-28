@@ -67,15 +67,6 @@ and start it:
 Detailed installation guides (incl. systemd service, Kubernetes, cluster setup) in the
 [official documentation](https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#how-to-start-victoriametrics).
 
-## Installing the adapter
-
-Install via the Admin UI under "Adapters" (once listed in the official repository) or from
-the GitHub URL:
-
-```bash
-iobroker url https://github.com/seaspotter/ioBroker.victoriametrics
-```
-
 ## Configuration
 
 ### "Connection" tab
