@@ -9,7 +9,7 @@
   "contributors": [],
   "homepage": "https://github.com/seaspotter/iobroker.victoriametrics",
   "license": "MIT",
-  "keywords": "victoriametrics,history,prometheus,monitoring,zeitreihe",
+  "keywords": ["victoriametrics", "history", "prometheus", "monitoring", "zeitreihe"],
   "repository": {
     "type": "git",
     "url": "https://github.com/seaspotter/iobroker.victoriametrics.git"

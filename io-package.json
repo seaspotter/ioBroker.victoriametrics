@@ -37,7 +37,7 @@
         "authors": [
             "Florian Horch <florian.horch@gmail.com>"
         ],
-        "keywords": "victoriametrics,history,prometheus,monitoring,zeitreihe",
+        "keywords": ["victoriametrics", "history", "prometheus", "monitoring", "zeitreihe"],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
