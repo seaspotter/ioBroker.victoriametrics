@@ -370,6 +370,7 @@ The current retention is visible in three places (all read-only, read once from 
 
 ## Changelog
 ### **WORK IN PROGRESS**
+* (SeaSpotter) Completed `info.retention`'s `common.name` translations to all 11 languages (flagged by the official repo review's object-structure check)
 
 ### 0.4.2 (2026-08-28)
 * (SeaSpotter) Fixed official ioBroker repo-checker findings: moved `encryptedNative`/`protectedNative` to the top level of `io-package.json` (were incorrectly nested under `common`), removed `common.docs` (redundant with the English README), fixed `info.retention`'s role, bumped `engines.node`/admin dependency minimums, added full responsive breakpoints to all admin config fields
