@@ -1,6 +1,6 @@
 {
   "name": "iobroker.victoriametrics",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Schreibt ioBroker-Datenpunkt-Historie nativ in VictoriaMetrics",
   "author": {
     "name": "SeaSpotter",

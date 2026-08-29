@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "victoriametrics",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "news": {
+      "0.4.3": {
+        "en": "Completed `info.retention`'s `common.name` translations to all 11 languages (flagged by the official repo review's object-structure check)",
+        "de": "Die Übersetzungen des `common.name`-Elements von `info.retention` in alle 11 Sprachen wurden abgeschlossen (dies wurde bei der Überprüfung der Objektstruktur im Rahmen der offiziellen Repository-Review festgestellt).",
+        "ru": "Завершены переводы `common.name` из `info.retention` на все 11 языков (отмечено проверкой структуры объекта в официальном репозитории).",
+        "pt": "Concluídas as traduções de `common.name` de `info.retention` para todos os 11 idiomas (sinalizadas pela verificação de estrutura de objetos da revisão oficial do repositório).",
+        "nl": "De vertalingen van `common.name` in `info.retention` naar alle 11 talen zijn voltooid (dit werd aangegeven door de objectstructuurcontrole van de officiële repository).",
+        "fr": "Traductions terminées de `common.name` de `info.retention` dans les 11 langues (signalées par la vérification de la structure des objets lors de l'examen officiel du dépôt).",
+        "it": "Traduzioni completate di `common.name` di `info.retention` in tutte le 11 lingue (segnalate dal controllo della struttura degli oggetti durante la revisione ufficiale del repository).",
+        "es": "Se completaron las traducciones de `common.name` de `info.retention` a los 11 idiomas (marcadas por la comprobación de estructura de objetos de la revisión oficial del repositorio).",
+        "pl": "Zakończono tłumaczenia `common.name` pliku `info.retention` na wszystkie 11 języków (oznaczone przez kontrolę struktury obiektów w oficjalnym repozytorium)",
+        "uk": "Завершено переклади `common.name` з `info.retention` на всі 11 мов (позначено перевіркою об'єктної структури в офіційному огляді репозиторію)",
+        "zh-cn": "已完成 `info.retention` 的 `common.name` 翻译成所有 11 种语言（经官方代码库审查的对象结构检查标记）"
+      },
       "0.4.2": {
         "en": "Fixed official ioBroker repo-checker findings: moved `encryptedNative`/`protectedNative` to the top level of `io-package.json` (were incorrectly nested under `common`), removed `common.docs` (redundant with the English README), fixed `info.retention`'s role, bumped `engines.node`/admin dependency minimums, added full responsive breakpoints to all admin config fields\nAdded `CHANGELOG_OLD.md`, `.github/dependabot.yml`, and dependabot auto-merge workflow\nReleases now auto-publish to npm via trusted publishing (OIDC) and auto-create the GitHub release when a version tag is pushed",
         "de": "Offizielle Fehler im ioBroker-Repository-Checker behoben: `encryptedNative`/`protectedNative` wurden in die oberste Ebene von `io-package.json` verschoben (sie waren fälschlicherweise unter `common` verschachtelt), `common.docs` wurde entfernt (da es mit der englischen README-Datei redundant war), die Rolle von `info.retention` wurde korrigiert, die Mindestanforderungen für `engines.node`/admin wurden erhöht und allen Admin-Konfigurationsfeldern wurden responsive Breakpoints hinzugefügt.\nDie Dateien `CHANGELOG_OLD.md`, `.github/dependabot.yml` und der Dependabot-Auto-Merge-Workflow wurden hinzugefügt.\nReleases werden nun automatisch über Trusted Publishing (OIDC) auf npm veröffentlicht und erstellen automatisch das GitHub-Release, sobald ein Versions-Tag gepusht wird.",

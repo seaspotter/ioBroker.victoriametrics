@@ -369,7 +369,7 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.4.3 (2026-08-29)
 * (SeaSpotter) Completed `info.retention`'s `common.name` translations to all 11 languages (flagged by the official repo review's object-structure check)
 
 ### 0.4.2 (2026-08-28)
@@ -396,9 +396,6 @@ The current retention is visible in three places (all read-only, read once from 
 * (SeaSpotter) Retention is now logged read-only on start (`/flags` endpoint)
 * (SeaSpotter) New message commands `storeState` (bulk import/migration), `deleteAll` (delete a datapoint's history) and `features` (capability discovery)
 * (SeaSpotter) Added `round`, `changesMinDelta`, `debounceTime`, `blockTime`, `ignoreBelowNumber`/`ignoreAboveNumber`, `ignoreZero` as per-datapoint filters
-
-### 0.2.0 (2026-08-28)
-* (SeaSpotter) `getHistory()` read path via the shared `@iobroker/aggregate` library
 
 Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
