@@ -171,7 +171,16 @@
         "role": "text",
         "name": {
           "en": "VictoriaMetrics retention (read-only)",
-          "de": "VictoriaMetrics-Retention (nur lesend)"
+          "de": "VictoriaMetrics-Retention (nur lesend)",
+          "ru": "Хранение данных VictoriaMetrics (только чтение)",
+          "pt": "Retenção do VictoriaMetrics (somente leitura)",
+          "nl": "VictoriaMetrics-retentie (alleen-lezen)",
+          "fr": "Rétention VictoriaMetrics (lecture seule)",
+          "it": "Conservazione VictoriaMetrics (sola lettura)",
+          "es": "Retención de VictoriaMetrics (solo lectura)",
+          "pl": "Przechowywanie VictoriaMetrics (tylko do odczytu)",
+          "uk": "Утримання VictoriaMetrics (лише читання)",
+          "zh-cn": "VictoriaMetrics 保留期（只读）"
         },
         "type": "string",
         "read": true,
