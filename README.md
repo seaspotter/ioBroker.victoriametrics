@@ -369,7 +369,7 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.4.4 (2026-09-11)
 * (SeaSpotter) Addressed maintainer review findings: translated all remaining German log/error messages to English, fixed the `cache` object's German-only name to a full i18n object, replaced the German `"zeitreihe"` keyword with `"timeseries"`, added code-level validation for `writeInterval`/`requestTimeout` against Node.js' timer maximum
 * (SeaSpotter) CI: added Node.js 26.x to the test matrix; upgraded `@iobroker/testing` to 6.2.1
 
@@ -393,13 +393,6 @@ The current retention is visible in three places (all read-only, read once from 
 * (SeaSpotter) New per-datapoint/default filters `changesOnly` (log changes only) and `changesRelogInterval` (periodic relog of unchanged values)
 * (SeaSpotter) Retention now also exposed as its own `info.retention` datapoint and in the "Test connection" success alert, not just the log
 * (SeaSpotter) New original adapter icon
-
-### 0.3.0 (2026-08-28)
-* (SeaSpotter) VMUI sidebar link in the Admin sidebar (`common.adminTab`, similar to Node-RED/Zigbee2MQTT)
-* (SeaSpotter) Instance-wide defaults for all history filters (round/changesMinDelta/debounceTime/blockTime/ignoreBelow-/AboveNumber/ignoreZero) – a datapoint's own value still overrides the default
-* (SeaSpotter) Retention is now logged read-only on start (`/flags` endpoint)
-* (SeaSpotter) New message commands `storeState` (bulk import/migration), `deleteAll` (delete a datapoint's history) and `features` (capability discovery)
-* (SeaSpotter) Added `round`, `changesMinDelta`, `debounceTime`, `blockTime`, `ignoreBelowNumber`/`ignoreAboveNumber`, `ignoreZero` as per-datapoint filters
 
 Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
