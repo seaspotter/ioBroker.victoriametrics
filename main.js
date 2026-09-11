@@ -63,7 +63,7 @@ class Victoriametrics extends utils.Adapter {
      */
     async onReady() {
         if (!this.config.host) {
-            this.log.error('Kein Host für VictoriaMetrics konfiguriert - Adapter wird beendet');
+            this.log.error('No host configured for VictoriaMetrics - adapter is stopping');
             return;
         }
 
@@ -75,12 +75,12 @@ class Victoriametrics extends utils.Adapter {
             const retentionValue = (retention.ok && retention.retention) || '';
             const retentionInfo = retentionValue ? ` (Retention: ${retentionValue})` : '';
             this.log.info(
-                `VictoriaMetrics unter ${this.config.protocol}://${this.config.host}:${this.config.port} erreichbar${retentionInfo}`,
+                `VictoriaMetrics reachable at ${this.config.protocol}://${this.config.host}:${this.config.port}${retentionInfo}`,
             );
             await this.setState('info.retention', retentionValue, true);
         } else {
             this.log.warn(
-                `VictoriaMetrics beim Start nicht erreichbar (${health.error}) - Werte werden bis zur Wiederverbindung gepuffert`,
+                `VictoriaMetrics not reachable at startup (${health.error}) - values will be buffered until reconnection`,
             );
         }
         await this.setState('info.connection', health.ok, true);
@@ -89,7 +89,27 @@ class Victoriametrics extends utils.Adapter {
         await this._setupSubscriptions();
         this.subscribeForeignObjects('*');
 
-        this.flushTimer = this.setInterval(() => this.flush(), this.config.writeInterval * 1000);
+        this.flushTimer = this.setInterval(() => this.flush(), this._resolveWriteIntervalMs());
+    }
+
+    /**
+     * Validiert writeInterval gegen Node.js' setTimeout/setInterval-Maximaldelay
+     * (2^31 - 1 ms) und stellt sicher, dass es positiv ist - ein zu großer oder
+     * ungültiger Wert würde sonst zu unvorhersehbarem Timer-Verhalten führen statt zum
+     * erwarteten Schreibintervall. Die Admin-UI setzt zwar bereits min: 1, das greift
+     * aber nur auf UI-Ebene.
+     *
+     * @returns {number} Gültiges Schreibintervall in ms
+     */
+    _resolveWriteIntervalMs() {
+        const configuredMs = Number(this.config.writeInterval) * 1000;
+        if (!Number.isFinite(configuredMs) || configuredMs <= 0 || configuredMs > CONFIG.MAX_TIMER_MS) {
+            this.log.warn(
+                `Invalid write interval (${this.config.writeInterval}s), falling back to ${CONFIG.DEFAULT_WRITE_INTERVAL_S}s`,
+            );
+            return CONFIG.DEFAULT_WRITE_INTERVAL_S * 1000;
+        }
+        return configuredMs;
     }
 
     /**
@@ -104,7 +124,7 @@ class Victoriametrics extends utils.Adapter {
                 await this._registerEnabledPoint(row.id, settings);
             }
         }
-        this.log.info(`${this.enabledPoints.size} Datenpunkt(e) für Historisierung in VictoriaMetrics aktiviert`);
+        this.log.info(`${this.enabledPoints.size} datapoint(s) enabled for history in VictoriaMetrics`);
     }
 
     /**
@@ -244,7 +264,7 @@ class Victoriametrics extends utils.Adapter {
 
         const name = metricName.deriveMetricName(id, settings, this.log);
         this.buffer.add({ pointId: id, metricName: name, labels, value, ts: state.ts });
-        this.log.debug(`Gepuffert: ${id} -> ${name}=${value} (${JSON.stringify(labels)})`);
+        this.log.debug(`Buffered: ${id} -> ${name}=${value} (${JSON.stringify(labels)})`);
 
         if (this.buffer.size() >= this.config.bufferMaxSize) {
             this.flush();
@@ -397,7 +417,7 @@ class Victoriametrics extends utils.Adapter {
             if (Number.isFinite(val)) {
                 return val;
             }
-            this.log.warn(`Wert von ${id} ist keine endliche Zahl (${val}) und wird übersprungen`);
+            this.log.warn(`Value of ${id} is not a finite number (${val}) and will be skipped`);
             return null;
         }
         if (typeof val === 'boolean') {
@@ -408,10 +428,10 @@ class Victoriametrics extends utils.Adapter {
             if (val.trim() !== '' && Number.isFinite(num)) {
                 return num;
             }
-            this.log.warn(`Wert von ${id} ("${val}") ist keine Zahl und wird übersprungen`);
+            this.log.warn(`Value of ${id} ("${val}") is not a number and will be skipped`);
             return null;
         }
-        this.log.warn(`Wert von ${id} hat einen nicht unterstützten Typ (${typeof val}) und wird übersprungen`);
+        this.log.warn(`Value of ${id} has an unsupported type (${typeof val}) and will be skipped`);
         return null;
     }
 
@@ -433,12 +453,10 @@ class Victoriametrics extends utils.Adapter {
             for (const point of points) {
                 this.errorPoints[point.pointId] = 0;
             }
-            this.log.debug(`${points.length} Punkt(e) erfolgreich nach VictoriaMetrics geschrieben`);
+            this.log.debug(`${points.length} point(s) successfully written to VictoriaMetrics`);
             await this.setState('info.connection', true, true);
         } else {
-            this.log.warn(
-                `Schreiben von ${points.length} Punkt(en) nach VictoriaMetrics fehlgeschlagen: ${result.error}`,
-            );
+            this.log.warn(`Writing ${points.length} point(s) to VictoriaMetrics failed: ${result.error}`);
             await this.setState('info.connection', false, true);
             this._applyRetryPolicy(points);
             await this._persistOnFailure();
@@ -482,7 +500,7 @@ class Victoriametrics extends utils.Adapter {
             if (this.errorPoints[point.pointId] < CONFIG.MAX_ERROR_COUNT) {
                 this.buffer.add(point);
             } else {
-                this.log.warn(`Verwerfe Punkt für ${point.pointId} nach ${CONFIG.MAX_ERROR_COUNT} Fehlversuchen`);
+                this.log.warn(`Discarding point for ${point.pointId} after ${CONFIG.MAX_ERROR_COUNT} failed attempts`);
                 this.errorPoints[point.pointId] = 0;
             }
         }
@@ -509,7 +527,7 @@ class Victoriametrics extends utils.Adapter {
             const data = this.buffer.toJSON(CONFIG.CACHE_FORMAT_VERSION);
             await this.writeFileAsync(`${this.namespace}.cache`, CONFIG.CACHE_FILE_NAME, JSON.stringify(data));
         } catch (err) {
-            this.log.debug(`Konnte Puffer-Cache nicht schreiben: ${err.message}`);
+            this.log.debug(`Could not write buffer cache: ${err.message}`);
         }
     }
 
@@ -526,11 +544,11 @@ class Victoriametrics extends utils.Adapter {
             const points = loaded.drainAll();
             if (points.length) {
                 this.buffer.requeue(points);
-                this.log.info(`${points.length} gepufferte Punkte aus vorherigem Lauf geladen`);
+                this.log.info(`${points.length} buffered points loaded from previous run`);
             }
             await this._persistCache();
         } catch {
-            this.log.debug('Kein Puffer-Cache aus vorherigem Lauf gefunden');
+            this.log.debug('No buffer cache found from previous run');
         }
     }
 
@@ -564,7 +582,7 @@ class Victoriametrics extends utils.Adapter {
 
         const cfg = obj.message && obj.message.config;
         if (!cfg || !cfg.host) {
-            this.sendTo(obj.from, obj.command, { error: 'Ungültige Verbindungsdaten' }, obj.callback);
+            this.sendTo(obj.from, obj.command, { error: 'Invalid connection data' }, obj.callback);
             return;
         }
 
@@ -602,7 +620,7 @@ class Victoriametrics extends utils.Adapter {
                 callback();
             }
         } catch (error) {
-            this.log.error(`Fehler beim Beenden des Adapters: ${error.message}`);
+            this.log.error(`Error while shutting down the adapter: ${error.message}`);
             callback();
         }
     }

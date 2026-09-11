@@ -90,7 +90,7 @@
       "history",
       "prometheus",
       "monitoring",
-      "zeitreihe"
+      "timeseries"
     ],
     "licenseInformation": {
       "type": "free",
@@ -206,7 +206,19 @@
       "_id": "cache",
       "type": "meta",
       "common": {
-        "name": "Puffer-Cache",
+        "name": {
+          "en": "Buffer cache",
+          "de": "Puffer-Cache",
+          "ru": "Кэш буфера",
+          "pt": "Cache de buffer",
+          "nl": "Buffercache",
+          "fr": "Cache tampon",
+          "it": "Cache del buffer",
+          "es": "Caché de búfer",
+          "pl": "Pamięć podręczna bufora",
+          "uk": "Кеш буфера",
+          "zh-cn": "缓冲区缓存"
+        },
         "type": "meta.folder"
       },
       "native": {}
