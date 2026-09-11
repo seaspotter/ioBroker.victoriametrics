@@ -68,6 +68,8 @@ Ausführen von PromQL-Abfragen, Graphen etc.) direkt unter `http://<Host>:<Port>
 Browser das Einbetten (Mixed-Content-Schutz) – dann öffnet sich eine leere Seite. Abhilfe nur durch
 VictoriaMetrics ebenfalls über HTTPS erreichbar zu machen, ein Workaround im Adapter ist nicht möglich.
 
+![VictoriaMetrics-Sidebar-Tab mit eingebetteter VMUI](../../admin/victoriametrics_AdminTab.png)
+
 ### Tab "Schreibverhalten"
 
 | Feld | Beschreibung |

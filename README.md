@@ -94,6 +94,8 @@ runs over HTTPS but VictoriaMetrics only over HTTP, the browser blocks the embed
 protection) and an empty page opens instead. The only fix is making VictoriaMetrics reachable
 over HTTPS as well – there is no workaround inside the adapter.
 
+![VictoriaMetrics sidebar tab embedding VMUI](admin/victoriametrics_AdminTab.png)
+
 ### "Write behavior" tab
 
 | Field | Description |
