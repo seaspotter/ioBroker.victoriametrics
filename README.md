@@ -371,7 +371,7 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.4.5 (2026-10-02)
 * (SeaSpotter) Translated one remaining German error string in `getHistory`'s invalid-id response (`lib/history.js`) that the review's log/sendTo/errors.push sweep had missed - it's returned to the caller via `sendTo`, same category as the `dataManagement.js` fix in 0.4.4
 * (SeaSpotter) Added full i18n names for the `info` channel and the `adminTab` (flagged by the official repo review's object-structure check)
 
@@ -391,14 +391,6 @@ The current retention is visible in three places (all read-only, read once from 
 * (SeaSpotter) README is now the canonical English documentation (required for official repo submission); full German documentation moved to `docs/de/victoriametrics.md`
 * (SeaSpotter) GitHub repository renamed to `ioBroker.victoriametrics` (capital B) to match convention
 * (SeaSpotter) Adapter-checker compliance fixes: trimmed unpublished versions from `common.news`, removed deprecated `common.title`, corrected `keywords`/`common.keywords` per-file rules
-
-### 0.4.0 (2026-08-28)
-* (SeaSpotter) Fix: the VMUI sidebar link threw a `URIError` on click (`%native_protocol%` wasn't substituted) – correct placeholder syntax per Admin's own source is `%protocol%`/`%host%`/`%port%` without the `native_` prefix
-* (SeaSpotter) Server-side PromQL pushdown for `getHistory` on the average/min/max/total/count aggregation methods (`avg_over_time` etc.) instead of raw-data export + JS aggregation
-* (SeaSpotter) `getHistory` with `id: '*'`: latest raw values across all currently enabled datapoints
-* (SeaSpotter) New per-datapoint/default filters `changesOnly` (log changes only) and `changesRelogInterval` (periodic relog of unchanged values)
-* (SeaSpotter) Retention now also exposed as its own `info.retention` datapoint and in the "Test connection" success alert, not just the log
-* (SeaSpotter) New original adapter icon
 
 Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
