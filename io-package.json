@@ -131,7 +131,16 @@
       "link": "%protocol%://%host%:%port%/vmui/",
       "name": {
         "en": "VictoriaMetrics",
-        "de": "VictoriaMetrics"
+        "de": "VictoriaMetrics",
+        "ru": "VictoriaMetrics",
+        "pt": "VictoriaMetrics",
+        "nl": "VictoriaMetrics",
+        "fr": "VictoriaMetrics",
+        "it": "VictoriaMetrics",
+        "es": "VictoriaMetrics",
+        "pl": "VictoriaMetrics",
+        "uk": "VictoriaMetrics",
+        "zh-cn": "VictoriaMetrics"
       },
       "singleton": true
     },
@@ -173,7 +182,19 @@
       "_id": "info",
       "type": "channel",
       "common": {
-        "name": "Information"
+        "name": {
+          "en": "Information",
+          "de": "Information",
+          "ru": "Информация",
+          "pt": "Informação",
+          "nl": "Informatie",
+          "fr": "Informations",
+          "it": "Informazioni",
+          "es": "Información",
+          "pl": "Informacje",
+          "uk": "Інформація",
+          "zh-cn": "信息"
+        }
       },
       "native": {}
     },
