@@ -145,6 +145,7 @@
     "mode": "daemon",
     "type": "storage",
     "compact": true,
+    "nogit": true,
     "connectionType": "local",
     "dataSource": "push",
     "messagebox": true,
