@@ -1,17 +1,40 @@
-'use strict';
+import axios, { type AxiosError } from 'axios';
+import { CONFIG } from './config';
 
-const axios = require('axios');
-const CONFIG = require('./config');
+/** Verbindungskonfiguration (entweder this.config des Adapters oder ungespeicherte Formulardaten). */
+export interface ConnectionConfig {
+    protocol: string;
+    host: string;
+    port: number;
+    useAuth?: boolean;
+    username?: string;
+    password?: string;
+    requestTimeout?: number;
+}
+
+/** Ergebnis einer VM-Anfrage ohne Nutzdaten. */
+export interface VmResult {
+    ok: boolean;
+    error?: string;
+}
+
+/** Ein Datenpunkt einer Zeitreihe. */
+export interface VmPoint {
+    ts: number;
+    val: number;
+}
 
 /**
  * Dünner HTTP-Client für die native VictoriaMetrics-Schreib-API.
  * Kennt weder Puffer noch Retry-Policy - das lebt in main.js.
  */
-class VmClient {
+export class VmClient {
+    private readonly log: ioBroker.Log;
+
     /**
-     * @param {ioBroker.Log} log - Adapter-Logger
+     * @param log - Adapter-Logger
      */
-    constructor(log) {
+    constructor(log: ioBroker.Log) {
         this.log = log;
     }
 
@@ -20,11 +43,15 @@ class VmClient {
      * (entweder this.config des Adapters oder ungespeicherte Formulardaten
      * aus dem Verbindungstest-Button).
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @returns {{baseURL: string, timeout: number, auth?: {username: string, password: string}}} axios-Request-Optionen
+     * @param cfg - Verbindungskonfiguration
+     * @returns axios-Request-Optionen
      */
-    _buildRequestOptions(cfg) {
-        const options = {
+    _buildRequestOptions(cfg: ConnectionConfig): {
+        baseURL: string;
+        timeout: number;
+        auth?: { username: string; password: string };
+    } {
+        const options: { baseURL: string; timeout: number; auth?: { username: string; password: string } } = {
             baseURL: `${cfg.protocol}://${cfg.host}:${cfg.port}`,
             timeout: this._resolveTimeout(cfg.requestTimeout),
         };
@@ -40,10 +67,10 @@ class VmClient {
      * manipuliert) würde sonst zu unvorhersehbarem Verhalten führen statt zum erwarteten
      * Timeout.
      *
-     * @param {unknown} raw - Roher requestTimeout-Konfigurationswert
-     * @returns {number} Gültiger Timeout in ms
+     * @param raw - Roher requestTimeout-Konfigurationswert
+     * @returns Gültiger Timeout in ms
      */
-    _resolveTimeout(raw) {
+    _resolveTimeout(raw: unknown): number {
         const n = Number(raw);
         if (!Number.isFinite(n) || n <= 0 || n > CONFIG.MAX_TIMER_MS) {
             return CONFIG.DEFAULT_REQUEST_TIMEOUT_MS;
@@ -55,10 +82,10 @@ class VmClient {
      * Entfernt sensible/redundante Details aus einem axios-Fehler, bevor er
      * geloggt wird (niemals Authorization-Header oder Passwort loggen).
      *
-     * @param {import('axios').AxiosError} err - Fehler aus einem axios-Request
-     * @returns {string} Kurze, sichere Fehlerzusammenfassung
+     * @param err - Fehler aus einem axios-Request
+     * @returns Kurze, sichere Fehlerzusammenfassung
      */
-    sanitizeError(err) {
+    sanitizeError(err: AxiosError): string {
         if (err.response) {
             const body = typeof err.response.data === 'string' ? err.response.data.slice(0, 200) : '';
             return `HTTP ${err.response.status}${body ? `: ${body}` : ''}`;
@@ -72,10 +99,10 @@ class VmClient {
     /**
      * Prüft die Erreichbarkeit von VictoriaMetrics über den /health-Endpunkt.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @returns {Promise<{ok: boolean, error?: string}>} Ergebnis des Health-Checks
+     * @param cfg - Verbindungskonfiguration
+     * @returns Ergebnis des Health-Checks
      */
-    async testHealth(cfg) {
+    async testHealth(cfg: ConnectionConfig): Promise<VmResult> {
         try {
             const response = await axios.get(CONFIG.VM_HEALTH_PATH, this._buildRequestOptions(cfg));
             return { ok: response.status === 200 };
@@ -88,11 +115,11 @@ class VmClient {
      * Schreibt einen Batch von Punkten als newline-delimited JSON an
      * VictoriaMetrics' /api/v1/import.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @param {string} ndjsonBody - Newline-delimited JSON-Payload
-     * @returns {Promise<{ok: boolean, error?: string}>} Ergebnis des Schreibversuchs
+     * @param cfg - Verbindungskonfiguration
+     * @param ndjsonBody - Newline-delimited JSON-Payload
+     * @returns Ergebnis des Schreibversuchs
      */
-    async writeBatch(cfg, ndjsonBody) {
+    async writeBatch(cfg: ConnectionConfig, ndjsonBody: string): Promise<VmResult> {
         try {
             await axios.post(CONFIG.VM_IMPORT_PATH, ndjsonBody, {
                 ...this._buildRequestOptions(cfg),
@@ -104,7 +131,7 @@ class VmClient {
                 // zerstört mehrzeilige NDJSON-Bodies (JSON.parse schlägt fehl, danach wird
                 // der gesamte String nochmal in Anführungszeichen gepackt). Transform
                 // deaktivieren, damit der Body unverändert gesendet wird.
-                transformRequest: [data => data],
+                transformRequest: [(data: unknown) => data],
             });
             return { ok: true };
         } catch (err) {
@@ -118,13 +145,18 @@ class VmClient {
      * (z.B. wenn sich das unit-Label über die Zeit geändert hat) zu einer nach
      * Zeitstempel aufsteigend sortierten Liste zusammen.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @param {string} metricName - Normalisierter Metrikname (__name__)
-     * @param {number} startMs - Beginn des Zeitraums in Millisekunden
-     * @param {number} endMs - Ende des Zeitraums in Millisekunden
-     * @returns {Promise<{ok: boolean, points?: {ts: number, val: number}[], error?: string}>} Ergebnis
+     * @param cfg - Verbindungskonfiguration
+     * @param metricName - Normalisierter Metrikname (__name__)
+     * @param startMs - Beginn des Zeitraums in Millisekunden
+     * @param endMs - Ende des Zeitraums in Millisekunden
+     * @returns Ergebnis
      */
-    async exportRange(cfg, metricName, startMs, endMs) {
+    async exportRange(
+        cfg: ConnectionConfig,
+        metricName: string,
+        startMs: number,
+        endMs: number,
+    ): Promise<VmResult & { points?: VmPoint[] }> {
         try {
             const response = await axios.get(CONFIG.VM_EXPORT_PATH, {
                 ...this._buildRequestOptions(cfg),
@@ -136,8 +168,7 @@ class VmClient {
                 responseType: 'text',
             });
 
-            /** @type {{ts: number, val: number}[]} */
-            const points = [];
+            const points: VmPoint[] = [];
             for (const line of String(response.data).split('\n')) {
                 if (!line.trim()) {
                     continue;
@@ -164,14 +195,20 @@ class VmClient {
      * dieselbe Punktform wie exportRange, damit beide Pfade gleich weiterverarbeitet werden
      * können.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @param {string} promqlQuery - Fertige PromQL/MetricsQL-Query, z.B. "avg_over_time(metric[60s])"
-     * @param {number} startMs - Beginn des Zeitraums in Millisekunden
-     * @param {number} endMs - Ende des Zeitraums in Millisekunden
-     * @param {number} stepMs - Schrittweite in Millisekunden
-     * @returns {Promise<{ok: boolean, points?: {ts: number, val: number}[], error?: string}>} Ergebnis
+     * @param cfg - Verbindungskonfiguration
+     * @param promqlQuery - Fertige PromQL/MetricsQL-Query, z.B. "avg_over_time(metric[60s])"
+     * @param startMs - Beginn des Zeitraums in Millisekunden
+     * @param endMs - Ende des Zeitraums in Millisekunden
+     * @param stepMs - Schrittweite in Millisekunden
+     * @returns Ergebnis
      */
-    async queryRange(cfg, promqlQuery, startMs, endMs, stepMs) {
+    async queryRange(
+        cfg: ConnectionConfig,
+        promqlQuery: string,
+        startMs: number,
+        endMs: number,
+        stepMs: number,
+    ): Promise<VmResult & { points?: VmPoint[] }> {
         try {
             const response = await axios.get(CONFIG.VM_QUERY_RANGE_PATH, {
                 ...this._buildRequestOptions(cfg),
@@ -183,8 +220,7 @@ class VmClient {
                 },
             });
 
-            /** @type {{ts: number, val: number}[]} */
-            const points = [];
+            const points: VmPoint[] = [];
             const series = (response.data && response.data.data && response.data.data.result) || [];
             for (const s of series) {
                 for (const [tsSeconds, valStr] of s.values || []) {
@@ -204,10 +240,10 @@ class VmClient {
      * (Klartext, kein JSON) aus. Read-only: VM's Retention ist ein Server-Start-Flag,
      * lässt sich nicht per API setzen/ändern.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @returns {Promise<{ok: boolean, retention?: string, error?: string}>} Ergebnis
+     * @param cfg - Verbindungskonfiguration
+     * @returns Ergebnis
      */
-    async getRetention(cfg) {
+    async getRetention(cfg: ConnectionConfig): Promise<VmResult & { retention?: string }> {
         try {
             const response = await axios.get(CONFIG.VM_FLAGS_PATH, {
                 ...this._buildRequestOptions(cfg),
@@ -225,11 +261,11 @@ class VmClient {
      * VictoriaMetrics' /api/v1/admin/tsdb/delete_series. VM kennt keine
      * Einzelpunkt-Löschung, nur ganze Zeitreihen per Label-Match.
      *
-     * @param {{protocol: string, host: string, port: number, useAuth?: boolean, username?: string, password?: string, requestTimeout?: number}} cfg - Verbindungskonfiguration
-     * @param {string} metricName - Normalisierter Metrikname (__name__)
-     * @returns {Promise<{ok: boolean, error?: string}>} Ergebnis
+     * @param cfg - Verbindungskonfiguration
+     * @param metricName - Normalisierter Metrikname (__name__)
+     * @returns Ergebnis
      */
-    async deleteSeries(cfg, metricName) {
+    async deleteSeries(cfg: ConnectionConfig, metricName: string): Promise<VmResult> {
         try {
             await axios.post(CONFIG.VM_DELETE_SERIES_PATH, null, {
                 ...this._buildRequestOptions(cfg),
@@ -241,5 +277,3 @@ class VmClient {
         }
     }
 }
-
-module.exports = { VmClient };

@@ -1,21 +1,20 @@
-'use strict';
-
-const utils = require('@iobroker/adapter-core');
-const CONFIG = require('./lib/config');
-const metricName = require('./lib/metricName');
-const { VmClient } = require('./lib/vmClient');
-const { SeriesBuffer } = require('./lib/buffer');
-const { handleGetHistory } = require('./lib/history');
-const { handleStoreState, handleDeleteAll, handleFeatures } = require('./lib/dataManagement');
+import * as utils from '@iobroker/adapter-core';
+import { CONFIG } from './lib/config';
+import * as metricName from './lib/metricName';
+import { VmClient } from './lib/vmClient';
+import { SeriesBuffer, type BufferedPoint } from './lib/buffer';
+import { handleGetHistory } from './lib/history';
+import { handleStoreState, handleDeleteAll, handleFeatures } from './lib/dataManagement';
+import type { CustomSettings } from './lib/types';
 
 /**
  * Parst ein optionales, aus dem Admin-UI kommendes Zahlenfeld (kann Zahl,
  * numerischer String, leerer String oder undefined sein).
  *
- * @param {string | number | undefined | null} raw - Roher Feldwert
- * @returns {number | undefined} Zahl oder undefined, wenn nicht gesetzt/ungültig
+ * @param raw - Roher Feldwert
+ * @returns Zahl oder undefined, wenn nicht gesetzt/ungültig
  */
-function parseOptionalNumber(raw) {
+function parseOptionalNumber(raw: string | number | undefined | null): number | undefined {
     if (raw === undefined || raw === '' || raw === null) {
         return undefined;
     }
@@ -23,31 +22,34 @@ function parseOptionalNumber(raw) {
     return Number.isFinite(n) ? n : undefined;
 }
 
-class Victoriametrics extends utils.Adapter {
+export class Victoriametrics extends utils.Adapter {
+    /** Aktivierte Datenpunkte: ID -> Custom-Settings */
+    enabledPoints = new Map<string, CustomSettings>();
+    /** ID -> object.common (für type/unit) */
+    objectCache = new Map<string, Partial<ioBroker.StateCommon>>();
+    /** ID -> zuletzt geschriebener Wert (für changesMinDelta) */
+    lastValues = new Map<string, number>();
+    /** ID -> Zeitpunkt (Date.now()) des zuletzt geschriebenen Werts (für blockTime) */
+    lastLogTimes = new Map<string, number>();
+    /** ID -> aktiver Entprellungs-Timer (für debounceTime) */
+    debounceTimers = new Map<string, ioBroker.Timeout>();
+    /** Fehlerzähler pro Punkt-ID */
+    errorPoints: Record<string, number> = {};
+    subscribedAll = false;
+    lastPersistOnFailure = 0;
+    flushTimer: ioBroker.Interval | undefined | null = null;
+    vmClient: VmClient;
+    buffer: SeriesBuffer;
+
     /**
-     * @param {Partial<utils.AdapterOptions>} [options] - Adapter options
+     * @param [options] - Adapter options
      */
-    constructor(options) {
+    constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
             name: 'victoriametrics',
         });
 
-        /** Aktivierte Datenpunkte: ID -> Custom-Settings */
-        this.enabledPoints = new Map();
-        /** ID -> object.common (für type/unit) */
-        this.objectCache = new Map();
-        /** ID -> zuletzt geschriebener Wert (für changesMinDelta) */
-        this.lastValues = new Map();
-        /** ID -> Zeitpunkt (Date.now()) des zuletzt geschriebenen Werts (für blockTime) */
-        this.lastLogTimes = new Map();
-        /** ID -> aktiver Entprellungs-Timer (für debounceTime) */
-        this.debounceTimers = new Map();
-        /** Fehlerzähler pro Punkt-ID */
-        this.errorPoints = {};
-        this.subscribedAll = false;
-        this.lastPersistOnFailure = 0;
-        this.flushTimer = null;
         this.vmClient = new VmClient(this.log);
         this.buffer = new SeriesBuffer();
 
@@ -61,7 +63,7 @@ class Victoriametrics extends utils.Adapter {
     /**
      * Is called when databases are connected and adapter received configuration.
      */
-    async onReady() {
+    async onReady(): Promise<void> {
         if (!this.config.host) {
             this.log.error('No host configured for VictoriaMetrics - adapter is stopping');
             return;
@@ -86,10 +88,10 @@ class Victoriametrics extends utils.Adapter {
         await this.setState('info.connection', health.ok, true);
 
         await this._loadEnabledPoints();
-        await this._setupSubscriptions();
+        this._setupSubscriptions();
         this.subscribeForeignObjects('*');
 
-        this.flushTimer = this.setInterval(() => this.flush(), this._resolveWriteIntervalMs());
+        this.flushTimer = this.setInterval(() => void this.flush(), this._resolveWriteIntervalMs());
     }
 
     /**
@@ -99,9 +101,9 @@ class Victoriametrics extends utils.Adapter {
      * erwarteten Schreibintervall. Die Admin-UI setzt zwar bereits min: 1, das greift
      * aber nur auf UI-Ebene.
      *
-     * @returns {number} Gültiges Schreibintervall in ms
+     * @returns Gültiges Schreibintervall in ms
      */
-    _resolveWriteIntervalMs() {
+    _resolveWriteIntervalMs(): number {
         const configuredMs = Number(this.config.writeInterval) * 1000;
         if (!Number.isFinite(configuredMs) || configuredMs <= 0 || configuredMs > CONFIG.MAX_TIMER_MS) {
             this.log.warn(
@@ -116,7 +118,7 @@ class Victoriametrics extends utils.Adapter {
      * Liest alle Objekte mit aktivierten Custom-Settings für diesen Adapter
      * (system/custom-View) und füllt enabledPoints/objectCache.
      */
-    async _loadEnabledPoints() {
+    async _loadEnabledPoints(): Promise<void> {
         const result = await this.getObjectViewAsync('system', 'custom', {});
         for (const row of result.rows) {
             const settings = row.value && row.value[this.namespace];
@@ -128,10 +130,10 @@ class Victoriametrics extends utils.Adapter {
     }
 
     /**
-     * @param {string} id - ioBroker-Objekt-ID
-     * @param {{enabled: boolean, aliasId?: string}} settings - Custom-Settings dieses Adapters für das Objekt
+     * @param id - ioBroker-Objekt-ID
+     * @param settings - Custom-Settings dieses Adapters für das Objekt
      */
-    async _registerEnabledPoint(id, settings) {
+    async _registerEnabledPoint(id: string, settings: CustomSettings): Promise<void> {
         this.enabledPoints.set(id, settings);
         const obj = await this.getForeignObjectAsync(id);
         this.objectCache.set(id, (obj && obj.common) || {});
@@ -141,7 +143,7 @@ class Victoriametrics extends utils.Adapter {
      * Wählt die Subscription-Strategie einmalig anhand der Anzahl aktivierter
      * Datenpunkte beim Start (siehe README, Abschnitt Architektur).
      */
-    async _setupSubscriptions() {
+    _setupSubscriptions(): void {
         if (this.enabledPoints.size <= CONFIG.SUBSCRIBE_THRESHOLD) {
             for (const id of this.enabledPoints.keys()) {
                 this.subscribeForeignStates(id);
@@ -156,17 +158,17 @@ class Victoriametrics extends utils.Adapter {
      * Is called if a subscribed object changes (immer auf '*' subscribed,
      * um Änderungen an den Custom-Settings live zu erkennen).
      *
-     * @param {string} id - Objekt-ID
-     * @param {ioBroker.Object | null | undefined} obj - Neuer Objektstand oder null bei Löschung
+     * @param id - Objekt-ID
+     * @param obj - Neuer Objektstand oder null bei Löschung
      */
-    onObjectChange(id, obj) {
+    onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
         const settings = obj && obj.common && obj.common.custom && obj.common.custom[this.namespace];
         const wasEnabled = this.enabledPoints.has(id);
         const isEnabled = !!(settings && settings.enabled);
 
         if (isEnabled) {
             this.enabledPoints.set(id, settings);
-            this.objectCache.set(id, obj.common);
+            this.objectCache.set(id, obj.common as Partial<ioBroker.StateCommon>);
             if (!wasEnabled && !this.subscribedAll) {
                 this.subscribeForeignStates(id);
             }
@@ -189,10 +191,10 @@ class Victoriametrics extends utils.Adapter {
     /**
      * Is called if a subscribed state changes.
      *
-     * @param {string} id - State-ID
-     * @param {ioBroker.State | null | undefined} state - Neuer Zustand oder null bei Löschung/Ablauf
+     * @param id - State-ID
+     * @param state - Neuer Zustand oder null bei Löschung/Ablauf
      */
-    onStateChange(id, state) {
+    onStateChange(id: string, state: ioBroker.State | null | undefined): void {
         if (!state || state.val === null || state.val === undefined) {
             return;
         }
@@ -211,7 +213,9 @@ class Victoriametrics extends utils.Adapter {
                 this.debounceTimers.delete(id);
                 this._processPoint(id, state, settings);
             }, debounceMs);
-            this.debounceTimers.set(id, timer);
+            if (timer) {
+                this.debounceTimers.set(id, timer);
+            }
             return;
         }
 
@@ -223,11 +227,11 @@ class Victoriametrics extends utils.Adapter {
      * puffert den Punkt, falls er nicht herausgefiltert wird. Wird entweder direkt
      * aus onStateChange oder verzögert nach Ablauf der Entprellzeit aufgerufen.
      *
-     * @param {string} id - State-ID
-     * @param {ioBroker.State} state - Zustand zum Zeitpunkt der (ggf. entprellten) Änderung
-     * @param {object} settings - Custom-Settings des Datenpunkts
+     * @param id - State-ID
+     * @param state - Zustand zum Zeitpunkt der (ggf. entprellten) Änderung
+     * @param settings - Custom-Settings des Datenpunkts
      */
-    _processPoint(id, state, settings) {
+    _processPoint(id: string, state: ioBroker.State, settings: CustomSettings): void {
         const common = this.objectCache.get(id) || {};
         const converted = this._convertValue(state.val, id);
         if (converted === null) {
@@ -256,8 +260,7 @@ class Victoriametrics extends utils.Adapter {
         this.lastValues.set(id, value);
         this.lastLogTimes.set(id, Date.now());
 
-        /** @type {Record<string, string>} */
-        const labels = {};
+        const labels: Record<string, string> = {};
         if (common.unit) {
             labels.unit = metricName.sanitizeLabelValue(common.unit);
         }
@@ -267,7 +270,7 @@ class Victoriametrics extends utils.Adapter {
         this.log.debug(`Buffered: ${id} -> ${name}=${value} (${JSON.stringify(labels)})`);
 
         if (this.buffer.size() >= this.config.bufferMaxSize) {
-            this.flush();
+            void this.flush();
         }
     }
 
@@ -276,12 +279,30 @@ class Victoriametrics extends utils.Adapter {
      * der instanzweite Standardwert aus this.config, sonst undefined. So müssen Nutzer
      * mit vielen Datenpunkten nicht jeden einzeln konfigurieren.
      *
-     * @param {object} settings - Custom-Settings des Datenpunkts
-     * @param {string} key - Feldname in settings (z.B. "round")
-     * @param {string} defaultsKey - Feldname in this.config für den instanzweiten Standard (z.B. "defaultRound")
-     * @returns {number | undefined} Zahl oder undefined, wenn weder Datenpunkt noch Standard gesetzt sind
+     * @param settings - Custom-Settings des Datenpunkts
+     * @param key - Feldname in settings (z.B. "round")
+     * @param defaultsKey - Feldname in this.config für den instanzweiten Standard (z.B. "defaultRound")
+     * @returns Zahl oder undefined, wenn weder Datenpunkt noch Standard gesetzt sind
      */
-    _resolveNumberSetting(settings, key, defaultsKey) {
+    _resolveNumberSetting(
+        settings: CustomSettings,
+        key:
+            | 'debounceTime'
+            | 'blockTime'
+            | 'round'
+            | 'changesMinDelta'
+            | 'changesRelogInterval'
+            | 'ignoreBelowNumber'
+            | 'ignoreAboveNumber',
+        defaultsKey:
+            | 'defaultDebounceTime'
+            | 'defaultBlockTime'
+            | 'defaultRound'
+            | 'defaultChangesMinDelta'
+            | 'defaultChangesRelogInterval'
+            | 'defaultIgnoreBelowNumber'
+            | 'defaultIgnoreAboveNumber',
+    ): number | undefined {
         const perPoint = parseOptionalNumber(settings[key]);
         if (perPoint !== undefined) {
             return perPoint;
@@ -293,11 +314,11 @@ class Victoriametrics extends utils.Adapter {
      * Prüft die Schwellenwerte ignoreBelowNumber/ignoreAboveNumber (Datenpunkt- oder
      * instanzweiter Standardwert).
      *
-     * @param {number} value - Umgewandelter Zahlenwert
-     * @param {{ignoreBelowNumber?: string | number, ignoreAboveNumber?: string | number}} settings - Custom-Settings des Datenpunkts
-     * @returns {boolean} true, wenn der Wert außerhalb des erlaubten Bereichs liegt
+     * @param value - Umgewandelter Zahlenwert
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns true, wenn der Wert außerhalb des erlaubten Bereichs liegt
      */
-    _isOutsideThreshold(value, settings) {
+    _isOutsideThreshold(value: number, settings: CustomSettings): boolean {
         const below = this._resolveNumberSetting(settings, 'ignoreBelowNumber', 'defaultIgnoreBelowNumber');
         if (below !== undefined && value < below) {
             return true;
@@ -310,11 +331,11 @@ class Victoriametrics extends utils.Adapter {
      * Prüft, ob Nullwerte für diesen Datenpunkt ignoriert werden sollen (ignoreZero,
      * Datenpunkt- oder instanzweiter Standardwert).
      *
-     * @param {number} value - Umgewandelter Zahlenwert
-     * @param {{ignoreZero?: boolean}} settings - Custom-Settings des Datenpunkts
-     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     * @param value - Umgewandelter Zahlenwert
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns true, wenn der Wert übersprungen werden soll
      */
-    _isIgnoredZero(value, settings) {
+    _isIgnoredZero(value: number, settings: CustomSettings): boolean {
         const ignoreZero = settings.ignoreZero !== undefined ? settings.ignoreZero : this.config.defaultIgnoreZero;
         return !!ignoreZero && value === 0;
     }
@@ -323,11 +344,11 @@ class Victoriametrics extends utils.Adapter {
      * Rundet den Wert auf die konfigurierte Anzahl Nachkommastellen (Datenpunkt- oder
      * instanzweiter Standardwert), sofern gesetzt.
      *
-     * @param {number} value - Umgewandelter Zahlenwert
-     * @param {{round?: string | number}} settings - Custom-Settings des Datenpunkts
-     * @returns {number} Ggf. gerundeter Wert
+     * @param value - Umgewandelter Zahlenwert
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns Ggf. gerundeter Wert
      */
-    _applyRounding(value, settings) {
+    _applyRounding(value: number, settings: CustomSettings): number {
         const decimals = this._resolveNumberSetting(settings, 'round', 'defaultRound');
         if (decimals === undefined || decimals < 0) {
             return value;
@@ -342,12 +363,12 @@ class Victoriametrics extends utils.Adapter {
      * Standardwert) unterscheidet und deshalb übersprungen werden soll. Der allererste
      * Wert eines Datenpunkts wird nie übersprungen.
      *
-     * @param {string} id - Objekt-ID
-     * @param {number} value - Neuer (bereits gerundeter) Wert
-     * @param {{changesMinDelta?: string | number}} settings - Custom-Settings des Datenpunkts
-     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     * @param id - Objekt-ID
+     * @param value - Neuer (bereits gerundeter) Wert
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns true, wenn der Wert übersprungen werden soll
      */
-    _isBelowMinDelta(id, value, settings) {
+    _isBelowMinDelta(id: string, value: number, settings: CustomSettings): boolean {
         const minDelta = this._resolveNumberSetting(settings, 'changesMinDelta', 'defaultChangesMinDelta');
         if (minDelta === undefined || minDelta <= 0) {
             return false;
@@ -363,12 +384,12 @@ class Victoriametrics extends utils.Adapter {
      * letzten Schreiben abgelaufen ist - so entstehen keine Lücken im Chart. Der allererste
      * Wert eines Datenpunkts wird nie übersprungen.
      *
-     * @param {string} id - Objekt-ID
-     * @param {number} value - Neuer (bereits gerundeter) Wert
-     * @param {{changesOnly?: boolean, changesRelogInterval?: string | number}} settings - Custom-Settings des Datenpunkts
-     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     * @param id - Objekt-ID
+     * @param value - Neuer (bereits gerundeter) Wert
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns true, wenn der Wert übersprungen werden soll
      */
-    _isSkippedByChangesOnly(id, value, settings) {
+    _isSkippedByChangesOnly(id: string, value: number, settings: CustomSettings): boolean {
         const changesOnly = settings.changesOnly !== undefined ? settings.changesOnly : this.config.defaultChangesOnly;
         if (!changesOnly) {
             return false;
@@ -390,11 +411,11 @@ class Victoriametrics extends utils.Adapter {
      * ignoriert neue Werte für die konfigurierte Zeitspanne nach dem zuletzt
      * geschriebenen Wert dieses Datenpunkts.
      *
-     * @param {string} id - Objekt-ID
-     * @param {{blockTime?: string | number}} settings - Custom-Settings des Datenpunkts
-     * @returns {boolean} true, wenn der Wert übersprungen werden soll
+     * @param id - Objekt-ID
+     * @param settings - Custom-Settings des Datenpunkts
+     * @returns true, wenn der Wert übersprungen werden soll
      */
-    _isBlockedByBlockTime(id, settings) {
+    _isBlockedByBlockTime(id: string, settings: CustomSettings): boolean {
         const blockMs = this._resolveNumberSetting(settings, 'blockTime', 'defaultBlockTime');
         if (blockMs === undefined || blockMs <= 0) {
             return false;
@@ -408,11 +429,11 @@ class Victoriametrics extends utils.Adapter {
      * schreibbare Zahl. Booleans werden zu 0.0/1.0, Strings werden als Zahl
      * geparst, nicht parsbare/andere Typen werden übersprungen.
      *
-     * @param {ioBroker.StateValue} val - Roher Zustandswert
-     * @param {string} id - Objekt-ID (nur für die Log-Meldung)
-     * @returns {number | null} Numerischer Wert oder null, wenn der Punkt übersprungen werden soll
+     * @param val - Roher Zustandswert
+     * @param id - Objekt-ID (nur für die Log-Meldung)
+     * @returns Numerischer Wert oder null, wenn der Punkt übersprungen werden soll
      */
-    _convertValue(val, id) {
+    _convertValue(val: ioBroker.StateValue, id: string): number | null {
         if (typeof val === 'number') {
             if (Number.isFinite(val)) {
                 return val;
@@ -440,7 +461,7 @@ class Victoriametrics extends utils.Adapter {
      * schreibt sie als newline-delimited JSON an VictoriaMetrics. Bei
      * Fehlschlag greift die Fehlerzähler-Retry-Policy.
      */
-    async flush() {
+    async flush(): Promise<void> {
         if (!this.buffer || this.buffer.size() === 0) {
             return;
         }
@@ -467,11 +488,18 @@ class Victoriametrics extends utils.Adapter {
      * Gruppiert Punkte nach (Metrikname + Labels) und baut daraus den
      * newline-delimited-JSON-Body für /api/v1/import.
      *
-     * @param {import('./lib/buffer').BufferedPoint[]} points - Zu schreibende Punkte
-     * @returns {string} NDJSON-Body
+     * @param points - Zu schreibende Punkte
+     * @returns NDJSON-Body
      */
-    _buildImportBody(points) {
-        const groups = new Map();
+    _buildImportBody(points: BufferedPoint[]): string {
+        const groups = new Map<
+            string,
+            {
+                metric: Record<string, string>;
+                values: number[];
+                timestamps: number[];
+            }
+        >();
         for (const point of points) {
             const key = `${point.metricName}|${JSON.stringify(point.labels)}`;
             let group = groups.get(key);
@@ -492,9 +520,9 @@ class Victoriametrics extends utils.Adapter {
      * Punkte unter dem Limit werden erneut gepuffert (ohne Größenbegrenzung),
      * Punkte am Limit werden verworfen und ihr Zähler zurückgesetzt.
      *
-     * @param {import('./lib/buffer').BufferedPoint[]} points - Punkte des fehlgeschlagenen Batches
+     * @param points - Punkte des fehlgeschlagenen Batches
      */
-    _applyRetryPolicy(points) {
+    _applyRetryPolicy(points: BufferedPoint[]): void {
         for (const point of points) {
             this.errorPoints[point.pointId] = (this.errorPoints[point.pointId] || 0) + 1;
             if (this.errorPoints[point.pointId] < CONFIG.MAX_ERROR_COUNT) {
@@ -510,7 +538,7 @@ class Victoriametrics extends utils.Adapter {
      * Persistiert den Puffer als Absicherung gegen einen harten Absturz
      * (kein sauberer onUnload), gedrosselt auf höchstens einmal pro Minute.
      */
-    async _persistOnFailure() {
+    async _persistOnFailure(): Promise<void> {
         const now = Date.now();
         if (now - this.lastPersistOnFailure < CONFIG.PERSIST_ON_FAILURE_MIN_INTERVAL_MS) {
             return;
@@ -522,12 +550,12 @@ class Victoriametrics extends utils.Adapter {
     /**
      * Schreibt den aktuellen Pufferinhalt in den ioBroker-Adapter-Dateispeicher.
      */
-    async _persistCache() {
+    async _persistCache(): Promise<void> {
         try {
             const data = this.buffer.toJSON(CONFIG.CACHE_FORMAT_VERSION);
             await this.writeFileAsync(`${this.namespace}.cache`, CONFIG.CACHE_FILE_NAME, JSON.stringify(data));
         } catch (err) {
-            this.log.debug(`Could not write buffer cache: ${err.message}`);
+            this.log.debug(`Could not write buffer cache: ${(err as Error).message}`);
         }
     }
 
@@ -535,7 +563,7 @@ class Victoriametrics extends utils.Adapter {
      * Lädt beim Start einen zuvor persistierten Puffer (falls vorhanden) und
      * leert die Cache-Datei danach wieder. Fehlerzähler starten bei 0.
      */
-    async _loadCache() {
+    async _loadCache(): Promise<void> {
         try {
             const result = await this.readFileAsync(`${this.namespace}.cache`, CONFIG.CACHE_FILE_NAME);
             const raw = result && result.file;
@@ -557,9 +585,9 @@ class Victoriametrics extends utils.Adapter {
      * im Admin-UI, getHistory-Anfragen von vis-Chart-Widgets, sowie storeState/
      * deleteAll/features für Skripte und Admin-Capability-Discovery).
      *
-     * @param {ioBroker.Message} obj - Empfangene Nachricht
+     * @param obj - Empfangene Nachricht
      */
-    async onMessage(obj) {
+    async onMessage(obj: ioBroker.Message): Promise<void> {
         if (obj.command === 'getHistory') {
             await handleGetHistory(this, obj);
             return;
@@ -604,9 +632,9 @@ class Victoriametrics extends utils.Adapter {
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      *
-     * @param {() => void} callback - Callback function
+     * @param callback - Callback function
      */
-    onUnload(callback) {
+    onUnload(callback: () => void): void {
         try {
             if (this.flushTimer) {
                 this.clearInterval(this.flushTimer);
@@ -620,17 +648,16 @@ class Victoriametrics extends utils.Adapter {
                 callback();
             }
         } catch (error) {
-            this.log.error(`Error while shutting down the adapter: ${error.message}`);
+            this.log.error(`Error while shutting down the adapter: ${(error as Error).message}`);
             callback();
         }
     }
 }
 
 if (require.main !== module) {
-    /**
-     * @param {Partial<utils.AdapterOptions>} [options] - Adapter options
-     */
-    module.exports = options => new Victoriametrics(options);
+    // Export the constructor in compact mode
+    module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new Victoriametrics(options);
 } else {
-    new Victoriametrics();
+    // otherwise start the instance directly
+    (() => new Victoriametrics())();
 }

@@ -1,11 +1,9 @@
-'use strict';
-
 /*
  * Zentrale, nicht vom Nutzer konfigurierbare Konstanten des Adapters.
  * Nutzer-konfigurierbare Werte (Host, Port, Schreibintervall, ...) liegen
  * in der Instanzkonfiguration (io-package.json "native" / this.config).
  */
-module.exports = {
+export const CONFIG = {
     // VictoriaMetrics HTTP API
     VM_IMPORT_PATH: '/api/v1/import',
     VM_EXPORT_PATH: '/api/v1/export',
@@ -62,4 +60,4 @@ module.exports = {
 
     // Label-Werte werden auf diese Länge gekappt
     LABEL_VALUE_MAX_LEN: 128,
-};
+} as const;

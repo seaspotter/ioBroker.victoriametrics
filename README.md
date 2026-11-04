@@ -363,6 +363,7 @@ The current retention is visible in three places (all read-only, read once from 
 
 | Script | Description |
 |--------|--------------|
+| `npm run build` | Compiles the TypeScript sources in `src/` to `build/` (required before starting the adapter) |
 | `npm run lint` | ESLint |
 | `npm run check` | Type check (`tsc --noEmit`) |
 | `npm run test:js` | Unit tests |
@@ -371,6 +372,9 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (SeaSpotter) Rewrote the adapter in TypeScript (sources in `src/`, compiled to `build/`); no functional changes
+
 ### 0.4.5 (2026-10-02)
 * (SeaSpotter) Translated one remaining German error string in `getHistory`'s invalid-id response (`lib/history.js`) that the review's log/sendTo/errors.push sweep had missed - it's returned to the caller via `sendTo`, same category as the `dataManagement.js` fix in 0.4.4
 * (SeaSpotter) Added full i18n names for the `info` channel and the `adminTab` (flagged by the official repo review's object-structure check)

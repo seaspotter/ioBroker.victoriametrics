@@ -1,0 +1,9 @@
+{
+    // Used by "npm run build": same as tsconfig.json, but without the tests
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "sourceMap": false
+    },
+    "include": ["src/**/*.ts", "src/**/*.d.ts"],
+    "exclude": ["src/**/*.test.ts", "build/**", "node_modules/**", "widgets/**"]
+}
