@@ -1,8 +1,8 @@
-'use strict';
-
-const { sendResponse } = require('@iobroker/aggregate');
-const CONFIG = require('./config');
-const metricName = require('./metricName');
+import { sendResponse, type GetHistoryOptions } from '@iobroker/aggregate';
+import { CONFIG } from './config';
+import * as metricName from './metricName';
+import type { Victoriametrics } from '../main';
+import type { VmPoint } from './vmClient';
 
 /**
  * Behandelt eine getHistory-Nachricht:
@@ -19,14 +19,13 @@ const metricName = require('./metricName');
  * Vorab-Flush ungeschriebener gepufferter Werte; keine ack/q/from-Felder
  * (Phase 1 speichert diese nicht in VM).
  *
- * @param {import('@iobroker/adapter-core').AdapterInstance & {vmClient: import('./vmClient').VmClient, enabledPoints: Map<string, object>}} adapter - Adapterinstanz
- * @param {ioBroker.Message} obj - Empfangene getHistory-Nachricht ({id, options})
+ * @param adapter - Adapterinstanz
+ * @param obj - Empfangene getHistory-Nachricht ({id, options})
  */
-async function handleGetHistory(adapter, obj) {
+export async function handleGetHistory(adapter: Victoriametrics, obj: ioBroker.Message): Promise<void> {
     const startTime = Date.now();
     const id = obj.message && obj.message.id;
-    /** @type {import('@iobroker/aggregate').GetHistoryOptions} */
-    const options = (obj.message && obj.message.options) || {};
+    const options: GetHistoryOptions = (obj.message && obj.message.options) || {};
 
     options.end = options.end || Date.now();
     options.start = options.start || options.end - CONFIG.HISTORY_DEFAULT_RANGE_MS;
@@ -53,7 +52,7 @@ async function handleGetHistory(adapter, obj) {
         foreignObj && foreignObj.common && foreignObj.common.custom && foreignObj.common.custom[adapter.namespace];
     const name = metricName.deriveMetricName(id, settings, adapter.log);
 
-    const pushdownFunc = CONFIG.PROMQL_PUSHDOWN_FUNCS[options.aggregate];
+    const pushdownFunc = (CONFIG.PROMQL_PUSHDOWN_FUNCS as Record<string, string | undefined>)[options.aggregate ?? ''];
     if (pushdownFunc) {
         const pushdownPoints = await tryPromqlPushdown(adapter, name, options, pushdownFunc);
         if (pushdownPoints) {
@@ -82,18 +81,23 @@ async function handleGetHistory(adapter, obj) {
  * sendResponse die eigene Aggregation überspringen und die übergebenen Punkte direkt
  * formatieren.
  *
- * @param {import('@iobroker/adapter-core').AdapterInstance & {vmClient: import('./vmClient').VmClient}} adapter - Adapterinstanz
- * @param {string} name - Metrikname
- * @param {import('@iobroker/aggregate').GetHistoryOptions} options - wird bei Erfolg mutiert (start/end/preAggregated)
- * @param {string} pushdownFunc - PromQL-Funktion, z.B. "avg_over_time"
- * @returns {Promise<{ts: number, val: number}[] | null>} Punkte bei Erfolg, sonst null (Rückfall auf Rohdaten-Pfad)
+ * @param adapter - Adapterinstanz
+ * @param name - Metrikname
+ * @param options - wird bei Erfolg mutiert (start/end/preAggregated)
+ * @param pushdownFunc - PromQL-Funktion, z.B. "avg_over_time"
+ * @returns Punkte bei Erfolg, sonst null (Rückfall auf Rohdaten-Pfad)
  */
-async function tryPromqlPushdown(adapter, name, options, pushdownFunc) {
+async function tryPromqlPushdown(
+    adapter: Victoriametrics,
+    name: string,
+    options: GetHistoryOptions,
+    pushdownFunc: string,
+): Promise<VmPoint[] | null> {
     // handleGetHistory hat start/end/count bereits mit Defaults befüllt, bevor diese
     // Funktion aufgerufen wird - hier lokal binden, damit TS die Werte als number sieht.
-    const start = /** @type {number} */ (options.start);
-    const end = /** @type {number} */ (options.end);
-    const count = /** @type {number} */ (options.count);
+    const start = options.start as number;
+    const end = options.end as number;
+    const count = options.count as number;
 
     let stepMs = options.step;
     if (!stepMs) {
@@ -127,20 +131,25 @@ async function tryPromqlPushdown(adapter, name, options, pushdownFunc) {
  * sie über verschiedene Metriken hinweg keinen Sinn ergibt - es werden immer Rohwerte
  * zurückgegeben, unabhängig vom angefragten aggregate.
  *
- * @param {import('@iobroker/adapter-core').AdapterInstance & {vmClient: import('./vmClient').VmClient, enabledPoints: Map<string, object>}} adapter - Adapterinstanz
- * @param {ioBroker.Message} obj - Empfangene getHistory-Nachricht
- * @param {import('@iobroker/aggregate').GetHistoryOptions} options - bereits mit Defaults befüllte Optionen
- * @param {number} startTime - Zeitpunkt des Nachrichteneingangs (für Logging in sendResponse)
+ * @param adapter - Adapterinstanz
+ * @param obj - Empfangene getHistory-Nachricht
+ * @param options - bereits mit Defaults befüllte Optionen
+ * @param startTime - Zeitpunkt des Nachrichteneingangs (für Logging in sendResponse)
  */
-async function handleMultiIdHistory(adapter, obj, options, startTime) {
+async function handleMultiIdHistory(
+    adapter: Victoriametrics,
+    obj: ioBroker.Message,
+    options: GetHistoryOptions,
+    startTime: number,
+): Promise<void> {
     if (options.aggregate && options.aggregate !== 'onchange' && options.aggregate !== 'none') {
         adapter.log.debug(
             `getHistory id:'*' does not support aggregation (requested: ${options.aggregate}) - returning raw values`,
         );
     }
 
-    const start = /** @type {number} */ (options.start);
-    const end = /** @type {number} */ (options.end);
+    const start = options.start as number;
+    const end = options.end as number;
     const ids = Array.from(adapter.enabledPoints.keys());
     const perIdResults = await Promise.all(
         ids.map(async id => {
@@ -165,5 +174,3 @@ async function handleMultiIdHistory(adapter, obj, options, startTime) {
     // Punkt bereits gesetzten individuellen ids überschreiben (siehe addId-Handling).
     sendResponse(adapter, obj, undefined, options, trimmed, startTime);
 }
-
-module.exports = { handleGetHistory };

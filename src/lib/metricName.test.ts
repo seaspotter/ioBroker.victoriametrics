@@ -1,7 +1,5 @@
-'use strict';
-
-const { expect } = require('chai');
-const { normalizeMetricName, deriveMetricName, sanitizeLabelValue } = require('./metricName');
+import { expect } from 'chai';
+import { normalizeMetricName, deriveMetricName, sanitizeLabelValue } from './metricName';
 
 describe('metricName', () => {
     describe('normalizeMetricName', () => {

@@ -43,23 +43,25 @@
     "@types/node": "^22.20.5",
     "typescript": "~5.9.3"
   },
-  "main": "main.js",
+  "main": "build/main.js",
   "files": [
     "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).{json,json5}",
     "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
-    "lib/",
+    "build/",
+    "!build/**/*.test.*",
     "www/",
     "docs/",
     "io-package.json",
-    "LICENSE",
-    "main.js"
+    "LICENSE"
   ],
   "scripts": {
-    "test:js": "mocha --config test/mocharc.custom.json \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
+    "build": "tsc -p tsconfig.build.json",
+    "build:test": "tsc -p tsconfig.json",
+    "test:js": "npm run build:test && mocha --config test/mocharc.custom.json \"build/**/*.test.js\"",
     "test:package": "mocha test/package --exit",
     "test:integration": "mocha test/integration --exit",
     "test": "npm run test:js && npm run test:package",
-    "check": "tsc --noEmit -p tsconfig.check.json",
+    "check": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint -c eslint.config.mjs .",
     "translate": "translate-adapter",
     "dev-server": "dev-server",

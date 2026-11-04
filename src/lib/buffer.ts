@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Ein gepufferter Punkt: {pointId, metricName, labels, value, ts}
  * - pointId: ioBroker-Objekt-ID, für die der Fehlerzähler geführt wird
@@ -7,42 +5,48 @@
  * - labels: zusätzliche Labels (z.B. unit)
  * - value: numerischer Wert
  * - ts: Zeitstempel in Millisekunden (Unix-Epoch)
- *
- * @typedef {{pointId: string, metricName: string, labels: Record<string, string>, value: number, ts: number}} BufferedPoint
  */
+export interface BufferedPoint {
+    /** ioBroker-Objekt-ID, für die der Fehlerzähler geführt wird */
+    pointId: string;
+    /** Normalisierter Prometheus-Metrikname */
+    metricName: string;
+    /** Zusätzliche Labels (z.B. unit) */
+    labels: Record<string, string>;
+    /** Numerischer Wert */
+    value: number;
+    /** Zeitstempel in Millisekunden (Unix-Epoch) */
+    ts: number;
+}
 
 /**
  * Einfache, ioBroker-unabhängige Puffer-Datenstruktur für noch nicht
  * geschriebene Datenpunkte. Kennt weder HTTP noch Adapter-Zustand
- * (Fehlerzähler-Policy lebt bewusst in main.js).
+ * (Fehlerzähler-Policy lebt bewusst in main.ts).
  */
-class SeriesBuffer {
-    /** Erstellt einen leeren Puffer. */
-    constructor() {
-        /** @type {BufferedPoint[]} */
-        this._points = [];
-    }
+export class SeriesBuffer {
+    private _points: BufferedPoint[] = [];
 
     /**
-     * @param {BufferedPoint} point - Zu puffernder Punkt
+     * @param point - Zu puffernder Punkt
      */
-    add(point) {
+    add(point: BufferedPoint): void {
         this._points.push(point);
     }
 
     /**
-     * @returns {number} Anzahl gepufferter Punkte
+     * @returns Anzahl gepufferter Punkte
      */
-    size() {
+    size(): number {
         return this._points.length;
     }
 
     /**
      * Entfernt und liefert alle gepufferten Punkte.
      *
-     * @returns {BufferedPoint[]} Alle bisher gepufferten Punkte
+     * @returns Alle bisher gepufferten Punkte
      */
-    drainAll() {
+    drainAll(): BufferedPoint[] {
         const points = this._points;
         this._points = [];
         return points;
@@ -52,17 +56,17 @@ class SeriesBuffer {
      * Legt Punkte wieder in den Puffer zurück (z.B. nach fehlgeschlagenem Schreibversuch).
      * Umgeht bewusst jegliche Größenbeschränkung.
      *
-     * @param {BufferedPoint[]} points - Wieder einzureihende Punkte
+     * @param points - Wieder einzureihende Punkte
      */
-    requeue(points) {
+    requeue(points: BufferedPoint[]): void {
         this._points.push(...points);
     }
 
     /**
-     * @param {number} formatVersion - Cache-Format-Version, die mitgespeichert wird
-     * @returns {{version: number, savedAt: number, points: BufferedPoint[]}} Serialisierbare Repräsentation
+     * @param formatVersion - Cache-Format-Version, die mitgespeichert wird
+     * @returns Serialisierbare Repräsentation
      */
-    toJSON(formatVersion) {
+    toJSON(formatVersion: number): { version: number; savedAt: number; points: BufferedPoint[] } {
         return {
             version: formatVersion,
             savedAt: Date.now(),
@@ -73,11 +77,14 @@ class SeriesBuffer {
     /**
      * Erzeugt einen Puffer aus einer zuvor mit toJSON() erzeugten Struktur.
      *
-     * @param {{version?: number, points?: BufferedPoint[]}} data - Geladene Cache-Daten
-     * @param {number} expectedVersion - Erwartetes Cache-Format
-     * @returns {SeriesBuffer} Neuer Puffer mit den geladenen Punkten
+     * @param data - Geladene Cache-Daten
+     * @param expectedVersion - Erwartetes Cache-Format
+     * @returns Neuer Puffer mit den geladenen Punkten
      */
-    static fromJSON(data, expectedVersion) {
+    static fromJSON(
+        data: { version?: number; points?: BufferedPoint[] } | null | undefined,
+        expectedVersion: number,
+    ): SeriesBuffer {
         const buffer = new SeriesBuffer();
         if (data && data.version === expectedVersion && Array.isArray(data.points)) {
             buffer._points = data.points;
@@ -85,5 +92,3 @@ class SeriesBuffer {
         return buffer;
     }
 }
-
-module.exports = { SeriesBuffer };
