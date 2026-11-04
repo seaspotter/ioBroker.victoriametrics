@@ -372,7 +372,7 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.5.0 (2026-11-04)
 * (SeaSpotter) Rewrote the adapter in TypeScript (sources in `src/`, compiled to `build/`); no functional changes
 
 ### 0.4.5 (2026-10-02)
@@ -390,11 +390,6 @@ The current retention is visible in three places (all read-only, read once from 
 * (SeaSpotter) Fixed official ioBroker repo-checker findings: moved `encryptedNative`/`protectedNative` to the top level of `io-package.json` (were incorrectly nested under `common`), removed `common.docs` (redundant with the English README), fixed `info.retention`'s role, bumped `engines.node`/admin dependency minimums, added full responsive breakpoints to all admin config fields
 * (SeaSpotter) Added `CHANGELOG_OLD.md`, `.github/dependabot.yml`, and dependabot auto-merge workflow
 * (SeaSpotter) Releases now auto-publish to npm via trusted publishing (OIDC) and auto-create the GitHub release when a version tag is pushed
-
-### 0.4.1 (2026-08-28)
-* (SeaSpotter) README is now the canonical English documentation (required for official repo submission); full German documentation moved to `docs/de/victoriametrics.md`
-* (SeaSpotter) GitHub repository renamed to `ioBroker.victoriametrics` (capital B) to match convention
-* (SeaSpotter) Adapter-checker compliance fixes: trimmed unpublished versions from `common.news`, removed deprecated `common.title`, corrected `keywords`/`common.keywords` per-file rules
 
 Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

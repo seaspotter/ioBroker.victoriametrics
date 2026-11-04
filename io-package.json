@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "victoriametrics",
-    "version": "0.4.5",
+    "version": "0.5.0",
     "news": {
+      "0.5.0": {
+        "en": "Rewrote the adapter in TypeScript (sources in `src/`, compiled to `build/`); no functional changes",
+        "de": "Adapter in TypeScript umgeschrieben (Quellen in `src/`, kompiliert zu `build/“); keine Funktionsänderung",
+        "ru": "Переписал адаптер на TypeScript (исходники в `src/`, скомпилированы в `build/ `); никаких функциональных изменений",
+        "pt": "Reescreveu o adaptador em TypeScript (fontes em `src/`, em `build/`); sem mudanças funcionais",
+        "nl": "De adapter herschreven in TypeScript (bronnen in `src/`, gecompileerd naar `build/`); geen functionele wijzigingen",
+        "fr": "L'adaptateur a été réécrit en TypeScript (sources dans src/et compilées dans build/) ; rien à voir",
+        "it": "Ha riscritto l'adattatore in TypeScript (sorgenti in src/`, in `build/`); nessuna modifica",
+        "es": "Reescribió el adaptador en TypeScript (fuente en `src/`, compilado en `build/`); sin cambios funcionales",
+        "pl": "Przepisano adapter w TypeScript (źródła w `src/`, skompilowane do `build/`); brak zmian funkcjonalnych",
+        "uk": "Переписано адаптер у TypeScript (джерела в `src/`, скомпільовані в `build/`); функціональних змін немає",
+        "zh-cn": "在 TypeScript 中重写了适配器（源代码在 `src/` 中，编译为 `build/`）；没有功能变化"
+      },
       "0.4.5": {
         "en": "Translated one remaining German error string in `getHistory`'s invalid-id response (`lib/history.js`) that the review's log/sendTo/errors.push sweep had missed - it's returned to the caller via `sendTo`, same category as the `dataManagement.js` fix in 0.4.4\nAdded full i18n names for the `info` channel and the `adminTab` (flagged by the official repo review's object-structure check)",
         "de": "Der Log/sendTo/Errors.Push Sweep der Bewertung hat einen verbleibenden deutschen Fehlerstring in der Invalid-ID-Antwort (`lib/history.js`) übersetzt — er wurde an den Anrufer über `sendTo` zurückgegeben, dieselbe Kategorie wie der `dataManagement.js`-Fix in 0.4.4\nVollständige I18n-Namen für den Kanal „Info“ und „AdminTab“ hinzugefügt (im Object-Structure Check des Repositorys markiert)",

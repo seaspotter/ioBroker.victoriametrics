@@ -1,4 +1,9 @@
 The newest change log is in README.md
+## 0.4.1 (2026-08-28)
+* (SeaSpotter) README is now the canonical English documentation (required for official repo submission); full German documentation moved to `docs/de/victoriametrics.md`
+* (SeaSpotter) GitHub repository renamed to `ioBroker.victoriametrics` (capital B) to match convention
+* (SeaSpotter) Adapter-checker compliance fixes: trimmed unpublished versions from `common.news`, removed deprecated `common.title`, corrected `keywords`/`common.keywords` per-file rules
+
 ## 0.4.0 (2026-08-28)
 * (SeaSpotter) Fix: the VMUI sidebar link threw a `URIError` on click (`%native_protocol%` wasn't substituted) – correct placeholder syntax per Admin's own source is `%protocol%`/`%host%`/`%port%` without the `native_` prefix
 * (SeaSpotter) Server-side PromQL pushdown for `getHistory` on the average/min/max/total/count aggregation methods (`avg_over_time` etc.) instead of raw-data export + JS aggregation
