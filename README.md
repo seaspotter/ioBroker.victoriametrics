@@ -405,7 +405,7 @@ The current retention is visible in three places (all read-only, read once from 
 | `npm run release` | Cuts a release (version bump, changelog/news sync, git tag) via [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script) |
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.6.0 (2026-11-05)
 * (SeaSpotter) New: optional self-hosted VictoriaMetrics in Docker, managed by the adapter like in the InfluxDB and SQL adapters (retention period configurable, default `100y`); Admin >= 7.7.2 required (feature request #26)
 * (SeaSpotter) Set `common.nogit` in `io-package.json`: the compiled `build/` directory is not committed, so the adapter is installable from npm only (flagged by the repository checker, E5019)
 
@@ -422,11 +422,6 @@ The current retention is visible in three places (all read-only, read once from 
 
 ### 0.4.3 (2026-08-29)
 * (SeaSpotter) Completed `info.retention`'s `common.name` translations to all 11 languages (flagged by the official repo review's object-structure check)
-
-### 0.4.2 (2026-08-28)
-* (SeaSpotter) Fixed official ioBroker repo-checker findings: moved `encryptedNative`/`protectedNative` to the top level of `io-package.json` (were incorrectly nested under `common`), removed `common.docs` (redundant with the English README), fixed `info.retention`'s role, bumped `engines.node`/admin dependency minimums, added full responsive breakpoints to all admin config fields
-* (SeaSpotter) Added `CHANGELOG_OLD.md`, `.github/dependabot.yml`, and dependabot auto-merge workflow
-* (SeaSpotter) Releases now auto-publish to npm via trusted publishing (OIDC) and auto-create the GitHub release when a version tag is pushed
 
 Older changelog entries can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

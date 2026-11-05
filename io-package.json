@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "victoriametrics",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "news": {
+      "0.6.0": {
+        "en": "New: optional self-hosted VictoriaMetrics in Docker, managed by the adapter like in the InfluxDB and SQL adapters (retention period configurable, default `100y`); Admin >= 7.7.2 required (feature request #26)\nSet `common.nogit` in `io-package.json`: the compiled `build/` directory is not committed, so the adapter is installable from npm only (flagged by the repository checker, E5019)",
+        "de": "Neu: optionales eigenes VictoriaMetrics in Docker, vom Adapter wie InfluxDB und SQL verwaltet (Aufbewahrungsdauer konfigurierbar, Standard `100y`); Admin >= 7.7.2 erforderlich (Feature-Anfrage #26)\n`common.nogit` in `io-package.json` setzen: Das kompilierte `build/` Verzeichnis ist nicht fest, also kann der Adapter nur von npm installiert werden (vom Repository-Checker, E5019)",
+        "ru": "Новое: опциональное самостоятельное размещение VictoriaMetrics в Docker, управляемое адаптером, как в адаптерах InfluxDB и SQL (срок хранения настраивается, по умолчанию «100 лет»); требуется администратор >= 7.7.2 (запрос функции #26)\nЗадайте `common.nogit` в `io-package.json`: скомпилированный каталог `build/` не зафиксирован, поэтому адаптер можно установить только из npm (отмечено средством проверки репозитория E5019)",
+        "pt": "Novo: VictoriaMetrics autônomo opcional no Docker, gerenciado pelo adaptador InfluxDB e SQL (período de retenção configurável, padrão `100y`); Admin >= 7.7.2 necessário (solicitação de recurso #26)\nDefina `common.nogit` em `io-package.json`: o diretório compilado `build/` não está confirmado, então o adaptador só pode ser instalado pelo npm (marcado pelo verificador, E5019)",
+        "nl": "Nieuw: optioneel zelf gehoste VictoriaMetrics in Docker, beheerd door de adapter, zoals in de InfluxDB- en SQL-adapters (bewaartermijn instelbaar, standaard `100y`); Admin >= 7.7.2 vereist (functieverzoek #26)\nStel `common.nogit` in `io-package.json` in: de gecompileerde map `build/` is niet vastgelegd, dus de adapter kan alleen vanaf npm worden geïnstalleerd (gemarkeerd door de repository-checker, E5019)",
+        "fr": "Nouveau : VictoriaMetrics auto-hébergé dans Docker en option, géré par l'adaptateur InfluxDB et SQL (durée de rétention configurable, 100 ans par défaut) ; Admin >= 7.7.2 requis (feature request #26)\nDéfinissez common.nogit dans io-package.json : le répertoire build/compilé n'est pas validé, donc l'adaptateur ne peut être installé que depuis npm (indiqué par le vérificateur de dépôt, E5019)",
+        "it": "Nuovo: VictoriaMetrics opzionale in Docker, gestito dall'adattatore come negli adattatori InfluxDB e SQL (periodo di conservazione configurabile, predefinito `100y`); Admin >= 7.7.2 (feature request #26)\nImposta `common.nogit` in `io-package.json`: la directory `build/` compilata non è salvata, quindi l'adattatore è installabile solo da npm (E5019)",
+        "es": "Nuevo: VictoriaMetrics autohospedado opcional en Docker, gestionado por el adaptador como en los adaptadores InfluxDB y SQL (período de retención configurable, por defecto «100 años»); Admin >= 7.7.2 (solicitud de función #26)\nDefina `common.nogit` en `io-package.json`: el directorio compilado `build/` no está confirmado, por lo que el adaptador solo se puede instalar desde npm (marcado por el comprobador de repositorios, E5019)",
+        "pl": "Nowość: opcjonalny samoobsługowy VictoriaMetrics w Docker, zarządzany przez adapter, podobnie jak w adapterach InfluxDB i SQL (konfigurowalny okres przechowywania, domyślnie `100y`); Wymagany administrator >= 7.7.2 (żądanie funkcji #26)\nUstaw `common.nogit` w `io-package.json`: skompilowany katalog `build/` nie jest zatwierdzony, więc adapter można zainstalować tylko z npm (oznaczony przez moduł sprawdzania repozytorium, E5019)",
+        "uk": "Нове: необов'язковий саморозміщений VictoriaMetrics у Docker, керований адаптером, як у адаптерах InfluxDB та SQL (період зберігання налаштовується, за замовчуванням `100y`); Адміністратор >= 7.7.2 необхідний (запит на функцію #26)\nВстановіть `common.nogit` у `io-package.json`: компільований каталог `build/` не підтверджено, тому адаптер можна встановити лише з npm (позначено перевіркою сховища, E5019)",
+        "zh-cn": "新增：Docker 中的可选自托管 VictoriaMetrics，由适配器管理，就像在 InfluxDB 和 SQL 适配器中一样（保留期可配置，默认为 100y）；需要管理员 >= 7.7.2（功能请求 #26）\n在 `io-package.json` 中设置 `common.nogit`：编译后的 build/` 目录未提交，因此只能从 npm 安装适配器（由存储库检查器标记，E5019）"
+      },
       "0.5.0": {
         "en": "Rewrote the adapter in TypeScript (sources in `src/`, compiled to `build/`); no functional changes",
         "de": "Adapter in TypeScript umgeschrieben (Quellen in `src/`, kompiliert zu `build/“); keine Funktionsänderung",
@@ -80,19 +93,6 @@
         "pl": "Plik README w języku angielskim, dokumentacja w języku niemieckim/de split, poprawki dotyczące zgodności modułu sprawdzania adapterów",
         "uk": "Англійська README, німецька docs/de split, виправлення відповідності адаптера",
         "zh-cn": "英语自述文件、德语文档/de split、适配器检查器合规性修复"
-      },
-      "0.4.0": {
-        "en": "PromQL server-side pushdown, multi-id getHistory, changesOnly/changesRelogInterval, retention in connection test, new icon",
-        "de": "PromQL-Pushdown, Multi-ID getHistory, changesOnly/changesRelogInterval, Retention im Verbindungstest, neues Icon",
-        "ru": "Продвижение PromQL на стороне сервера, getHistory с несколькими идентификаторами,changeOnly/changesRelogInterval, проверка сохранения соединения, новый значок",
-        "pt": "Pushdown do lado do servidor PromQL, getHistory multi-id, changeOnly/changesRelogInterval, retenção no teste de conexão, novo ícone",
-        "nl": "PromQL pushdown op de server, multi-id getHistory, changeOnly/changesRelogInterval, retentie in verbindingstest, nieuw pictogram",
-        "fr": "Refoulement côté serveur PromQL, getHistory multi-id, changesOnly/changesRelogInterval, rétention dans le test de connexion, nouvelle icône",
-        "it": "Pushdown lato server PromQL, getHistory multi-id, changeOnly/changesRelogInterval, mantenimento nel test di connessione, nuova icona",
-        "es": "Pushdown del lado del servidor PromQL, getHistory de múltiples ID, cambiosOnly/changesRelogInterval, prueba de retención en la conexión, nuevo icono",
-        "pl": "PromQL pushdown po stronie serwera, getHistory z wieloma identyfikatorami, zmianyOnly/changesRelogInterval, test zachowania połączenia, nowa ikona",
-        "uk": "PromQL на стороні сервера, що повертається, getHistory з декількома ідентифікаторами, changesOnly/changesRelogInterval, утримання під час перевірки з’єднання, новий значок",
-        "zh-cn": "PromQL 服务器端下推、多 id getHistory、changesOnly/changesRelogInterval、连接测试中的保留、新图标"
       }
     },
     "titleLang": {
