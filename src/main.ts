@@ -1,7 +1,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { CONFIG } from './lib/config';
 import * as metricName from './lib/metricName';
-import { VmClient } from './lib/vmClient';
+import { VmClient, type ConnectionConfig } from './lib/vmClient';
 import { SeriesBuffer, type BufferedPoint } from './lib/buffer';
 import { handleGetHistory } from './lib/history';
 import { handleStoreState, handleDeleteAll, handleFeatures } from './lib/dataManagement';
@@ -61,23 +61,47 @@ export class Victoriametrics extends utils.Adapter {
     }
 
     /**
+     * Effektive Verbindungskonfiguration: bei aktiviertem Docker-Betrieb der lokal gestartete
+     * Container (Host/Port/Protokoll aus den Docker-Einstellungen, ohne Auth), sonst die
+     * Verbindungseinstellungen aus dem Admin-UI.
+     *
+     * @returns Verbindungskonfiguration für den VmClient
+     */
+    get connection(): ConnectionConfig {
+        const docker = this.config.dockerVictoria;
+        if (docker?.enabled) {
+            // 0.0.0.0 / :: / leer = "auf allen Interfaces gebunden" - der Adapter selbst erreicht den Container lokal
+            const bind = !docker.bind || docker.bind === '0.0.0.0' || docker.bind === '::' ? '127.0.0.1' : docker.bind;
+            return {
+                protocol: 'http',
+                host: bind,
+                port: Number(docker.port) || 8428,
+                useAuth: false,
+                requestTimeout: this.config.requestTimeout,
+            };
+        }
+        return this.config;
+    }
+
+    /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady(): Promise<void> {
-        if (!this.config.host) {
+        const connection = this.connection;
+        if (!connection.host) {
             this.log.error('No host configured for VictoriaMetrics - adapter is stopping');
             return;
         }
 
         await this._loadCache();
 
-        const health = await this.vmClient.testHealth(this.config);
+        const health = await this.vmClient.testHealth(connection);
         if (health.ok) {
-            const retention = await this.vmClient.getRetention(this.config);
+            const retention = await this.vmClient.getRetention(connection);
             const retentionValue = (retention.ok && retention.retention) || '';
             const retentionInfo = retentionValue ? ` (Retention: ${retentionValue})` : '';
             this.log.info(
-                `VictoriaMetrics reachable at ${this.config.protocol}://${this.config.host}:${this.config.port}${retentionInfo}`,
+                `VictoriaMetrics reachable at ${connection.protocol}://${connection.host}:${connection.port}${retentionInfo}${this.config.dockerVictoria?.enabled ? ' [Docker]' : ''}`,
             );
             await this.setState('info.retention', retentionValue, true);
         } else {
@@ -468,7 +492,7 @@ export class Victoriametrics extends utils.Adapter {
 
         const points = this.buffer.drainAll();
         const body = this._buildImportBody(points);
-        const result = await this.vmClient.writeBatch(this.config, body);
+        const result = await this.vmClient.writeBatch(this.connection, body);
 
         if (result.ok) {
             for (const point of points) {

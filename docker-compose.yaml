@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+    victoriametrics:
+        image: victoriametrics/victoria-metrics:latest
+        labels:
+            # the default must be "false": it is what an instance that has no dockerVictoria in its native
+            # config falls back to (e.g. after an upgrade from 0.5.x), and nobody may get containers created
+            # without asking for them
+            - 'iobEnabled=${config.dockerVictoria.enabled:-false}'
+            - 'iobStopOnUnload=${config.dockerVictoria.stopIfInstanceStopped:-false}'
+            - 'iobAutoImageUpdate=${config.dockerVictoria.autoImageUpdate:-true}'
+            - 'iobBackup=victoriametrics_data'
+        # `true` selects the default name of the instance: iob_<adapterName>_<instance>
+        container_name: true
+        ports:
+            - '${config.dockerVictoria.bind:-127.0.0.1}:${config_dockerVictoria_port:-8428}:8428'
+        command:
+            - '-storageDataPath=/victoria-metrics-data'
+            - '-retentionPeriod=${config.dockerVictoria.retentionPeriod:-100y}'
+        volumes:
+            - victoriametrics_data:/victoria-metrics-data
+        networks:
+            - true
+        restart: unless-stopped
+
+networks:
+    true:
+        driver: bridge
+
+volumes:
+    victoriametrics_data:

@@ -146,6 +146,13 @@
     "type": "storage",
     "compact": true,
     "nogit": true,
+    "plugins": {
+      "docker": {
+        "iobDockerComposeFiles": [
+          "docker-compose.yaml"
+        ]
+      }
+    },
     "connectionType": "local",
     "dataSource": "push",
     "messagebox": true,
@@ -179,7 +186,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.6.20"
+        "admin": ">=7.7.2"
       }
     ]
   },
@@ -201,7 +208,15 @@
     "defaultIgnoreAboveNumber": "",
     "defaultIgnoreZero": false,
     "defaultChangesOnly": false,
-    "defaultChangesRelogInterval": ""
+    "defaultChangesRelogInterval": "",
+    "dockerVictoria": {
+      "enabled": false,
+      "bind": "127.0.0.1",
+      "port": 8428,
+      "retentionPeriod": "100y",
+      "stopIfInstanceStopped": false,
+      "autoImageUpdate": true
+    }
   },
   "objects": [],
   "instanceObjects": [

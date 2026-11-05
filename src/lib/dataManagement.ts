@@ -138,7 +138,7 @@ export async function handleDeleteAll(adapter: Victoriametrics, obj: ioBroker.Me
 
     for (const id of ids) {
         const name = await resolveMetricName(adapter, id);
-        const result = await adapter.vmClient.deleteSeries(adapter.config, name);
+        const result = await adapter.vmClient.deleteSeries(adapter.connection, name);
         if (!result.ok) {
             adapter.sendTo(
                 obj.from,

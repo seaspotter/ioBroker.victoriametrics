@@ -63,7 +63,7 @@ export async function handleGetHistory(adapter: Victoriametrics, obj: ioBroker.M
         // verändert, weiter mit dem normalen Rohdaten-Pfad unten.
     }
 
-    const result = await adapter.vmClient.exportRange(adapter.config, name, options.start, options.end);
+    const result = await adapter.vmClient.exportRange(adapter.connection, name, options.start, options.end);
     if (!result.ok) {
         sendResponse(adapter, obj, id, options, `Reading from VictoriaMetrics failed: ${result.error}`, startTime);
         return;
@@ -112,7 +112,13 @@ async function tryPromqlPushdown(
     const paddedEnd = end + stepSeconds * 1000;
     const query = `${pushdownFunc}(${name}[${stepSeconds}s])`;
 
-    const result = await adapter.vmClient.queryRange(adapter.config, query, paddedStart, paddedEnd, stepSeconds * 1000);
+    const result = await adapter.vmClient.queryRange(
+        adapter.connection,
+        query,
+        paddedStart,
+        paddedEnd,
+        stepSeconds * 1000,
+    );
     if (!result.ok) {
         adapter.log.debug(`PromQL pushdown failed, falling back to the raw-data path: ${result.error}`);
         return null;
@@ -155,7 +161,7 @@ async function handleMultiIdHistory(
         ids.map(async id => {
             const settings = adapter.enabledPoints.get(id);
             const name = metricName.deriveMetricName(id, settings, adapter.log);
-            const result = await adapter.vmClient.exportRange(adapter.config, name, start, end);
+            const result = await adapter.vmClient.exportRange(adapter.connection, name, start, end);
             if (!result.ok) {
                 return [];
             }

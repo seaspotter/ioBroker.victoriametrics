@@ -6,19 +6,37 @@
             "type": "panel",
             "label": "Verbindung",
             "items": {
+                "dockerVictoria.enabled": {
+                    "type": "checkDocker",
+                    "label": "Selbst gehostetes VictoriaMetrics in Docker verwenden",
+                    "help": "docker_explanation",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
                 "protocol": {
                     "type": "select",
                     "label": "Protokoll",
                     "options": [
-                        { "value": "http", "label": "http" },
-                        { "value": "https", "label": "https" }
+                        {
+                            "value": "http",
+                            "label": "http"
+                        },
+                        {
+                            "value": "https",
+                            "label": "https"
+                        }
                     ],
                     "newLine": true,
                     "xs": 12,
                     "sm": 6,
                     "md": 3,
                     "lg": 2,
-                    "xl": 2
+                    "xl": 2,
+                    "hidden": "!!data.dockerVictoria?.enabled"
                 },
                 "host": {
                     "type": "text",
@@ -28,7 +46,8 @@
                     "sm": 6,
                     "md": 5,
                     "lg": 4,
-                    "xl": 4
+                    "xl": 4,
+                    "hidden": "!!data.dockerVictoria?.enabled"
                 },
                 "port": {
                     "type": "number",
@@ -39,7 +58,8 @@
                     "sm": 6,
                     "md": 4,
                     "lg": 3,
-                    "xl": 3
+                    "xl": 3,
+                    "hidden": "!!data.dockerVictoria?.enabled"
                 },
                 "useAuth": {
                     "type": "checkbox",
@@ -49,12 +69,13 @@
                     "sm": 12,
                     "md": 4,
                     "lg": 3,
-                    "xl": 3
+                    "xl": 3,
+                    "hidden": "!!data.dockerVictoria?.enabled"
                 },
                 "username": {
                     "type": "text",
                     "label": "Benutzername",
-                    "hidden": "!data.useAuth",
+                    "hidden": "!data.useAuth || !!data.dockerVictoria?.enabled",
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
@@ -64,7 +85,7 @@
                 "password": {
                     "type": "password",
                     "label": "Passwort",
-                    "hidden": "!data.useAuth",
+                    "hidden": "!data.useAuth || !!data.dockerVictoria?.enabled",
                     "xs": 12,
                     "sm": 6,
                     "md": 4,
@@ -84,7 +105,8 @@
                 },
                 "testConnectionDivider": {
                     "type": "divider",
-                    "newLine": true
+                    "newLine": true,
+                    "hidden": "!!data.dockerVictoria?.enabled"
                 },
                 "testConnection": {
                     "type": "sendTo",
@@ -104,7 +126,70 @@
                     },
                     "result": {
                         "ok": "Verbindung erfolgreich (Retention: %s)"
-                    }
+                    },
+                    "hidden": "!!data.dockerVictoria?.enabled"
+                }
+            }
+        },
+        "dockerTab": {
+            "type": "panel",
+            "label": "VictoriaMetrics Docker",
+            "hidden": "!data.dockerVictoria?.enabled",
+            "items": {
+                "dockerVictoria.bind": {
+                    "newLine": true,
+                    "listenOnAllPorts": true,
+                    "type": "ip",
+                    "label": "Container auf IP starten",
+                    "help": "127.0.0.1 = nur auf diesem Rechner erreichbar. Nur in vertrauenswürdigen Netzen auf 0.0.0.0 oder eine andere IP ändern: VictoriaMetrics hat hier keine Zugangsbeschränkung.",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 8,
+                    "lg": 8,
+                    "xl": 8
+                },
+                "dockerVictoria.port": {
+                    "type": "port",
+                    "label": "Port",
+                    "help": "Port, unter dem der Container auf diesem Rechner erreichbar ist",
+                    "default": 8428,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 4,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "dockerVictoria.retentionPeriod": {
+                    "newLine": true,
+                    "type": "text",
+                    "label": "Aufbewahrungsdauer (Retention)",
+                    "help": "Zahl = Monate, oder mit Einheit h, d, w, y (z. B. 12, 90d, 100y). Eine Änderung erstellt den Container neu; die Daten bleiben erhalten.",
+                    "default": "100y",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6
+                },
+                "dockerVictoria.stopIfInstanceStopped": {
+                    "newLine": true,
+                    "type": "checkbox",
+                    "label": "Container stoppen, wenn die Instanz stoppt",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6
+                },
+                "dockerVictoria.autoImageUpdate": {
+                    "type": "checkbox",
+                    "label": "Docker-Image automatisch aktualisieren",
+                    "help": "Wenn aktiviert, wird beim Start des Adapters das neueste Docker-Image geladen.",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         },

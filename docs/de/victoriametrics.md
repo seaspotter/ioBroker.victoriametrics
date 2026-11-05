@@ -2,7 +2,7 @@
 
 - Eine laufende VictoriaMetrics-Instanz (Single-Node), erreichbar per HTTP(S) – siehe
   [Installation von VictoriaMetrics](#installation-von-victoriametrics) unten
-- ioBroker js-controller >= 6.0.11, Admin >= 7.0.23
+- ioBroker js-controller >= 6.0.11, Admin >= 7.7.2
 
 ## Installation von VictoriaMetrics
 
@@ -27,6 +27,38 @@ Danach ist VictoriaMetrics unter `http://<Docker-Host>:8428` erreichbar (Health-
 Docker-Image: [victoriametrics/victoria-metrics auf Docker Hub](https://hub.docker.com/r/victoriametrics/victoria-metrics/).
 Für dauerhaften Betrieb empfiehlt sich ein Volume/Bind-Mount für `-storageDataPath` (siehe
 oben) sowie – je nach Umgebung – ein `docker-compose.yml` mit `restart: unless-stopped`.
+
+### Docker vom Adapter verwalten lassen
+
+Der Adapter kann – wie der InfluxDB- und der SQL-Adapter – einen eigenen VictoriaMetrics-Container
+starten und pflegen. Docker muss auf dem ioBroker-Rechner installiert sein und der Benutzer
+`iobroker` muss es verwenden dürfen (ggf. `iob fix` ausführen).
+
+1. In den Instanz-Einstellungen im Tab „Verbindung" **Selbst gehostetes VictoriaMetrics in Docker
+   verwenden** aktivieren. Die Verbindungsfelder (Protokoll, Host, Port, Authentifizierung) werden
+   dann ausgeblendet, weil der Adapter die Verbindung selbst einrichtet.
+2. Bei Bedarf im Bereich **VictoriaMetrics Docker** Einstellungen anpassen und speichern. Der Adapter
+   legt den Container an und startet ihn.
+
+| Einstellung | Standard | Beschreibung |
+|-------------|----------|--------------|
+| Container auf IP starten | `127.0.0.1` | Der Container ist nur auf diesem Rechner erreichbar. Mit `0.0.0.0` oder der IP des Rechners ist VictoriaMetrics (VMUI, andere Werkzeuge) auch von anderen Computern erreichbar – **nur in einem vertrauenswürdigen Netz**, VictoriaMetrics hat hier keine Zugangsbeschränkung. |
+| Port | `8428` | Port, unter dem der Container auf dem Rechner veröffentlicht wird |
+| Aufbewahrungsdauer (Retention) | `100y` | Wird als `-retentionPeriod` übergeben. Eine reine Zahl bedeutet Monate, sonst eine Einheit `h`, `d`, `w` oder `y` anhängen (z. B. `12`, `90d`, `100y`). Eine Änderung erstellt den Container neu; die Daten bleiben erhalten. |
+| Container stoppen, wenn die Instanz stoppt | aus | Ausgeschaltet lassen, wenn andere Werkzeuge dasselbe VictoriaMetrics nutzen |
+| Docker-Image automatisch aktualisieren | an | Lädt beim Start des Adapters das neueste Image `victoriametrics/victoria-metrics` |
+
+- Die Daten liegen im Docker-Volume `victoriametrics_data` (mit Instanz-Präfix, z. B.
+  `iob_victoriametrics_0_victoriametrics_data`) und bleiben bei Updates und beim Neuerstellen des
+  Containers erhalten. Das Volume ist in ioBroker-Backups enthalten.
+- Docker ist **standardmäßig aus**; bei bestehenden Installationen wird nichts angelegt.
+- Das Ausschalten der Option löscht weder den Container noch die Daten.
+- Der Button „Verbindung testen" ist bei aktiviertem Docker ausgeblendet, da der Container vor dem
+  ersten Start noch nicht existiert. Ob VictoriaMetrics erreichbar ist, zeigt der Datenpunkt
+  `info.connection`.
+- Der VMUI-Link in der Admin-Seitenleiste nutzt Host und Port der manuellen Verbindungseinstellungen
+  und funktioniert deshalb mit der Docker-Option nicht. Stattdessen `http://<ioBroker-Host>:<Port>/vmui/`
+  öffnen (Standard-Port `8428`).
 
 ### Ohne Docker
 
