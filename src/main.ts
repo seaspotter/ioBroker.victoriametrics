@@ -1,3 +1,4 @@
+import * as os from 'node:os';
 import * as utils from '@iobroker/adapter-core';
 import { CONFIG } from './lib/config';
 import * as metricName from './lib/metricName';
@@ -84,9 +85,49 @@ export class Victoriametrics extends utils.Adapter {
     }
 
     /**
+     * Der VMUI-Link in der Admin-Seitenleiste (`common.adminTab.link`) wird von Admin aus
+     * protocol/host/port der Instanz-Konfiguration aufgebaut. Bei aktiviertem Docker-Betrieb sind
+     * diese Felder im UI ausgeblendet und leer - deshalb werden sie hier auf den Container
+     * abgeglichen. Bei Bind-Adresse 0.0.0.0 (alle Interfaces) wird der Hostname dieses Rechners
+     * verwendet, so wie es auch Admin für seine eigenen Links tut. Eine Änderung startet die
+     * Instanz einmalig neu.
+     *
+     * @returns true, wenn die Konfiguration geändert wurde (die Instanz wird dann neu gestartet)
+     */
+    async _syncVmuiLinkSettings(): Promise<boolean> {
+        const docker = this.config.dockerVictoria;
+        if (!docker?.enabled) {
+            return false;
+        }
+        const allInterfaces = !docker.bind || docker.bind === '0.0.0.0' || docker.bind === '::';
+        const desired = {
+            protocol: 'http',
+            host: allInterfaces ? os.hostname() : docker.bind,
+            port: Number(docker.port) || 8428,
+        };
+        if (
+            this.config.protocol === desired.protocol &&
+            this.config.host === desired.host &&
+            Number(this.config.port) === desired.port
+        ) {
+            return false;
+        }
+        this.log.info(
+            `Updating the connection settings for the VMUI link to the Docker container (${desired.protocol}://${desired.host}:${desired.port})`,
+        );
+        await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, { native: desired });
+        return true;
+    }
+
+    /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady(): Promise<void> {
+        if (await this._syncVmuiLinkSettings()) {
+            // js-controller restarts the instance because its configuration changed
+            return;
+        }
+
         const connection = this.connection;
         if (!connection.host) {
             this.log.error('No host configured for VictoriaMetrics - adapter is stopping');

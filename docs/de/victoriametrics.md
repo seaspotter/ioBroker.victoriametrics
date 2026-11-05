@@ -56,9 +56,12 @@ starten und pflegen. Docker muss auf dem ioBroker-Rechner installiert sein und d
 - Der Button „Verbindung testen" ist bei aktiviertem Docker ausgeblendet, da der Container vor dem
   ersten Start noch nicht existiert. Ob VictoriaMetrics erreichbar ist, zeigt der Datenpunkt
   `info.connection`.
-- Der VMUI-Link in der Admin-Seitenleiste nutzt Host und Port der manuellen Verbindungseinstellungen
-  und funktioniert deshalb mit der Docker-Option nicht. Stattdessen `http://<ioBroker-Host>:<Port>/vmui/`
-  öffnen (Standard-Port `8428`).
+- Der VMUI-Link in der Admin-Seitenleiste funktioniert auch mit der Docker-Option: Solange sie aktiv
+  ist, gleicht der Adapter die (ausgeblendeten) Verbindungseinstellungen mit dem Container ab, daraus
+  baut Admin den Link. Bei **Container auf IP starten** `0.0.0.0` wird der Hostname des ioBroker-Rechners
+  verwendet. Eine Änderung startet die Instanz einmalig neu. Wenn Sie die Docker-Option später wieder
+  ausschalten, bleiben diese Werte in den Verbindungseinstellungen stehen – tragen Sie dann Ihren
+  eigenen Server ein.
 
 ### Ohne Docker
 

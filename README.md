@@ -81,9 +81,11 @@ allowed to use it (run `iob fix` if it is not).
 - Disabling the option does not delete the container or the data.
 - The "Test connection" button is hidden while Docker is enabled, because the container does not
   exist before the first start. The state `info.connection` shows whether VictoriaMetrics is reachable.
-- The VMUI link in the Admin sidebar uses the host and port of the manual connection settings and
-  therefore does not work with the Docker option. Open `http://<ioBroker-host>:<port>/vmui/` instead
-  (default port `8428`).
+- The VMUI link in the Admin sidebar works with the Docker option, too: while it is enabled, the adapter
+  keeps the (hidden) connection settings in sync with the container, so Admin can build the link from
+  them. With **Start container on IP** `0.0.0.0` the host name of the ioBroker host is used. A change
+  restarts the instance once. When you disable the Docker option later, these values stay in the
+  connection settings - set them to your own server then.
 
 ### Without Docker
 
