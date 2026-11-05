@@ -1,7 +1,8 @@
+import * as os from 'node:os';
 import * as utils from '@iobroker/adapter-core';
 import { CONFIG } from './lib/config';
 import * as metricName from './lib/metricName';
-import { VmClient } from './lib/vmClient';
+import { VmClient, type ConnectionConfig } from './lib/vmClient';
 import { SeriesBuffer, type BufferedPoint } from './lib/buffer';
 import { handleGetHistory } from './lib/history';
 import { handleStoreState, handleDeleteAll, handleFeatures } from './lib/dataManagement';
@@ -61,23 +62,87 @@ export class Victoriametrics extends utils.Adapter {
     }
 
     /**
+     * Effektive Verbindungskonfiguration: bei aktiviertem Docker-Betrieb der lokal gestartete
+     * Container (Host/Port/Protokoll aus den Docker-Einstellungen, ohne Auth), sonst die
+     * Verbindungseinstellungen aus dem Admin-UI.
+     *
+     * @returns Verbindungskonfiguration für den VmClient
+     */
+    get connection(): ConnectionConfig {
+        const docker = this.config.dockerVictoria;
+        if (docker?.enabled) {
+            // 0.0.0.0 / :: / leer = "auf allen Interfaces gebunden" - der Adapter selbst erreicht den Container lokal
+            const bind = !docker.bind || docker.bind === '0.0.0.0' || docker.bind === '::' ? '127.0.0.1' : docker.bind;
+            return {
+                protocol: 'http',
+                host: bind,
+                port: Number(docker.port) || 8428,
+                useAuth: false,
+                requestTimeout: this.config.requestTimeout,
+            };
+        }
+        return this.config;
+    }
+
+    /**
+     * Der VMUI-Link in der Admin-Seitenleiste (`common.adminTab.link`) wird von Admin aus
+     * protocol/host/port der Instanz-Konfiguration aufgebaut. Bei aktiviertem Docker-Betrieb sind
+     * diese Felder im UI ausgeblendet und leer - deshalb werden sie hier auf den Container
+     * abgeglichen. Bei Bind-Adresse 0.0.0.0 (alle Interfaces) wird der Hostname dieses Rechners
+     * verwendet, so wie es auch Admin für seine eigenen Links tut. Eine Änderung startet die
+     * Instanz einmalig neu.
+     *
+     * @returns true, wenn die Konfiguration geändert wurde (die Instanz wird dann neu gestartet)
+     */
+    async _syncVmuiLinkSettings(): Promise<boolean> {
+        const docker = this.config.dockerVictoria;
+        if (!docker?.enabled) {
+            return false;
+        }
+        const allInterfaces = !docker.bind || docker.bind === '0.0.0.0' || docker.bind === '::';
+        const desired = {
+            protocol: 'http',
+            host: allInterfaces ? os.hostname() : docker.bind,
+            port: Number(docker.port) || 8428,
+        };
+        if (
+            this.config.protocol === desired.protocol &&
+            this.config.host === desired.host &&
+            Number(this.config.port) === desired.port
+        ) {
+            return false;
+        }
+        this.log.info(
+            `Updating the connection settings for the VMUI link to the Docker container (${desired.protocol}://${desired.host}:${desired.port})`,
+        );
+        await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, { native: desired });
+        return true;
+    }
+
+    /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady(): Promise<void> {
-        if (!this.config.host) {
+        if (await this._syncVmuiLinkSettings()) {
+            // js-controller restarts the instance because its configuration changed
+            return;
+        }
+
+        const connection = this.connection;
+        if (!connection.host) {
             this.log.error('No host configured for VictoriaMetrics - adapter is stopping');
             return;
         }
 
         await this._loadCache();
 
-        const health = await this.vmClient.testHealth(this.config);
+        const health = await this.vmClient.testHealth(connection);
         if (health.ok) {
-            const retention = await this.vmClient.getRetention(this.config);
+            const retention = await this.vmClient.getRetention(connection);
             const retentionValue = (retention.ok && retention.retention) || '';
             const retentionInfo = retentionValue ? ` (Retention: ${retentionValue})` : '';
             this.log.info(
-                `VictoriaMetrics reachable at ${this.config.protocol}://${this.config.host}:${this.config.port}${retentionInfo}`,
+                `VictoriaMetrics reachable at ${connection.protocol}://${connection.host}:${connection.port}${retentionInfo}${this.config.dockerVictoria?.enabled ? ' [Docker]' : ''}`,
             );
             await this.setState('info.retention', retentionValue, true);
         } else {
@@ -468,7 +533,7 @@ export class Victoriametrics extends utils.Adapter {
 
         const points = this.buffer.drainAll();
         const body = this._buildImportBody(points);
-        const result = await this.vmClient.writeBatch(this.config, body);
+        const result = await this.vmClient.writeBatch(this.connection, body);
 
         if (result.ok) {
             for (const point of points) {

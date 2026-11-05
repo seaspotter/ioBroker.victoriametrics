@@ -34,5 +34,16 @@
     "Nur Änderungen aufzeichnen": "Log changes only",
     "Schreibt einen Wert nur, wenn er sich vom zuletzt geschriebenen Wert unterscheidet.": "Only writes a value if it differs from the last written value.",
     "Relog-Intervall (ms, optional)": "Relog interval (ms, optional)",
-    "Schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen. Nur wirksam bei aktiviertem 'Nur Änderungen aufzeichnen'.": "Writes an unchanged value again at the latest after this time, so charts don't show gaps. Only effective when 'Log changes only' is enabled."
+    "Schreibt einen unveränderten Wert spätestens nach dieser Zeit erneut, damit im Chart keine Lücken entstehen. Nur wirksam bei aktiviertem 'Nur Änderungen aufzeichnen'.": "Writes an unchanged value again at the latest after this time, so charts don't show gaps. Only effective when 'Log changes only' is enabled.",
+    "Selbst gehostetes VictoriaMetrics in Docker verwenden": "Use self-hosted VictoriaMetrics in Docker",
+    "docker_explanation": "The adapter can run its own VictoriaMetrics server in a Docker container. Docker must be installed on this host and the ioBroker user must be allowed to use it. The container is created and started automatically; the connection settings are then applied by the adapter itself and hidden here.",
+    "VictoriaMetrics Docker": "VictoriaMetrics Docker",
+    "Container auf IP starten": "Start container on IP",
+    "127.0.0.1 = nur auf diesem Rechner erreichbar. Nur in vertrauenswürdigen Netzen auf 0.0.0.0 oder eine andere IP ändern: VictoriaMetrics hat hier keine Zugangsbeschränkung.": "127.0.0.1 = reachable on this host only. Change it to 0.0.0.0 or another IP only in trusted networks: VictoriaMetrics has no access restriction here.",
+    "Port, unter dem der Container auf diesem Rechner erreichbar ist": "The port on which the container will be reachable on this host",
+    "Aufbewahrungsdauer (Retention)": "Retention period",
+    "Zahl = Monate, oder mit Einheit h, d, w, y (z. B. 12, 90d, 100y). Eine Änderung erstellt den Container neu; die Daten bleiben erhalten.": "A number means months, or add a unit h, d, w, y (e.g. 12, 90d, 100y). Changing it re-creates the container; the data is kept.",
+    "Container stoppen, wenn die Instanz stoppt": "Stop container when instance stops",
+    "Docker-Image automatisch aktualisieren": "Auto-update Docker image",
+    "Wenn aktiviert, wird beim Start des Adapters das neueste Docker-Image geladen.": "If enabled, the latest Docker image will be pulled when the adapter starts."
 }
