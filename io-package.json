@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "victoriametrics",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "news": {
+      "0.6.1": {
+        "en": "Raised the minimum Node.js version to 22.19.0, as required by `@iobroker/plugin-docker` (flagged by the repository checker, W0069)",
+        "de": "Mindestversion von Node.js auf 22.19.0 erhöht, wie von `@iobroker /plugin-docker` (vom Repository-Checker markiert, W0069)",
+        "ru": "Увеличена минимальная версия Node.js до 22.19.0 в соответствии с требованиями `@iobroker /plugin-docker` (отмечена программой проверки репозитория W0069)",
+        "pt": "Aumentou a versão mínima do Node.js para 22.19.0, conforme exigido por `@iobroker /plugin-docker` (marcado pelo W0069)",
+        "nl": "De minimale versie van Node.js is verhoogd naar 22.19.0, zoals vereist voor `@iobroker /plugin-docker` (gemarkeerd door de repository-checker, W0069)",
+        "fr": "La version minimale de Node.js a été portée à 22.19.0, comme l'exige `@iobroker /plugin-docker` (indiqué par le vérificateur de dépôt, W0069)",
+        "it": "La versione minima di Node.js è stata aumentata alla 22.19.0, come richiesto da @iobroker /plugin-docker (W0069)",
+        "es": "Ha subido la versión mínima de Node.js a 22.19.0, como exige `@iobroker /plugin-docker` (marcado por el comprobador de repositorios, W0069)",
+        "pl": "Podniesiono minimalną wersję Node.js do 22.19.0, zgodnie z wymaganiami `@iobroker /plugin-docker` (oznaczone przez moduł sprawdzania repozytorium, W0069)",
+        "uk": "Піднято мінімальну версію Node.js до 22.19.0, як того вимагає `@iobroker /plugin-docker` (позначено перевіркою сховища, W0069)",
+        "zh-cn": "按照 @iobroker /plugin-docker 的要求，将 Node.js 的最低版本提高到 22.19.0（由存储库检查器 W0069 标记）"
+      },
       "0.6.0": {
         "en": "New: optional self-hosted VictoriaMetrics in Docker, managed by the adapter like in the InfluxDB and SQL adapters (retention period configurable, default `100y`); Admin >= 7.7.2 required (feature request #26)\nSet `common.nogit` in `io-package.json`: the compiled `build/` directory is not committed, so the adapter is installable from npm only (flagged by the repository checker, E5019)",
         "de": "Neu: optionales eigenes VictoriaMetrics in Docker, vom Adapter wie InfluxDB und SQL verwaltet (Aufbewahrungsdauer konfigurierbar, Standard `100y`); Admin >= 7.7.2 erforderlich (Feature-Anfrage #26)\n`common.nogit` in `io-package.json` setzen: Das kompilierte `build/` Verzeichnis ist nicht fest, also kann der Adapter nur von npm installiert werden (vom Repository-Checker, E5019)",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono oficjalne ustalenia programu do sprawdzania repozytoriów ioBroker: przeniesiono `encryptedNative`/`protectedNative` na najwyższy poziom `io-package.json` (były nieprawidłowo zagnieżdżone w `common`), usunięto `common.docs` (było zbędne w przypadku angielskiego pliku README), naprawiono rolę `info.retention`, zwiększono minimalne zależności w `engines.node`/admin, dodano w pełni responsywne punkty przerwania do wszystkich pól konfiguracji administratora\nDodano `CHANGELOG_OLD.md`, `.github/dependabot.yml` i automatyczny przepływ pracy scalania dependabot\nWydania są teraz automatycznie publikowane w npm za pośrednictwem zaufanego publikowania (OIDC) i automatycznie tworzone w GitHub po przesłaniu znacznika wersji",
         "uk": "Виправлено офіційні недоліки перевірки репозиторіїв ioBroker: переміщено `encryptedNative`/`protectedNative` на верхній рівень `io-package.json` (були неправильно вкладені в `common`), видалено `common.docs` (надлишковий з англійським README), виправлено роль `info.retention`, збільшено мінімальні залежності `engines.node`/admin, додано повноцінні адаптивні точки зупинки до всіх полів конфігурації адміністратора.\nДодано `CHANGELOG_OLD.md`, `.github/dependabot.yml` та робочий процес автоматичного об'єднання dependabot\nРелізи тепер автоматично публікуються в npm через довірену публікацію (OIDC) та автоматично створюються на GitHub після надсилання тегу версії.",
         "zh-cn": "修复了官方 ioBroker repo-checker 的发现：将 `encryptedNative`/`protectedNative` 移至 `io-package.json` 的顶层（之前错误地嵌套在 `common` 下），移除了 `common.docs`（与英文 README 重复），修复了 `info.retention` 的角色，提高了 `engines.node`/admin 依赖项的最低要求，并为所有 admin 配置字段添加了完全响应式断点。\n新增了 `CHANGELOG_OLD.md`、`.github/dependabot.yml` 和 dependabot 自动合并工作流\n现在，版本发布会自动通过可信发布（OIDC）发布到 npm，并在推送版本标签时自动创建 GitHub 发布版本。"
-      },
-      "0.4.1": {
-        "en": "English README, German docs/de split, adapter-checker compliance fixes",
-        "de": "Englisches README, deutsche docs/de-Aufteilung, Adapter-Checker-Korrekturen",
-        "ru": "Английский README, немецкая документация/разделение, исправления соответствия адаптера",
-        "pt": "README em inglês, documentos/de split em alemão, correções de conformidade do verificador de adaptador",
-        "nl": "Engelse README, Duitse docs/de split, conformiteitsoplossingen voor adapter-checker",
-        "fr": "README anglais, documents allemands/de split, correctifs de conformité du vérificateur d'adaptateur",
-        "it": "README inglese, divisione docs/de tedesco, correzioni di conformità del controllo dell'adattatore",
-        "es": "README en inglés, documentos alemanes/de split, correcciones de cumplimiento del verificador de adaptadores",
-        "pl": "Plik README w języku angielskim, dokumentacja w języku niemieckim/de split, poprawki dotyczące zgodności modułu sprawdzania adapterów",
-        "uk": "Англійська README, німецька docs/de split, виправлення відповідності адаптера",
-        "zh-cn": "英语自述文件、德语文档/de split、适配器检查器合规性修复"
       }
     },
     "titleLang": {
