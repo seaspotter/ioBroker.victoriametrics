@@ -1,9 +1,6 @@
 name: Test and Release
 
-# Run this job on all pushes and pull requests, as well as tags with a semantic version. "branches:
-# main" is declared (not dropped) so the ioBroker repository checker's E3007 rule is satisfied -
-# the actual "don't re-test a push to main, the merged PR already was" skip lives in each job's own
-# "if:" below instead, since that gets the same result without an empty-feeling trigger config.
+# Run this job on all pushes and pull requests, as well as tags with a semantic version
 on:
   push:
     branches:
@@ -23,11 +20,7 @@ concurrency:
 jobs:
   # Performs quick checks before the expensive test runs
   check-and-lint:
-    # Skip for a plain push to main - that commit was already tested on its merged pull
-    # request. Still runs for pull requests and for an actual version tag push.
-    if: |
-      contains(github.event.head_commit.message, '[skip ci]') == false &&
-      (github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/'))
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ubuntu-latest
 
@@ -42,10 +35,7 @@ jobs:
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
     needs: check-and-lint
-    # Same skip as check-and-lint above.
-    if: |
-      contains(github.event.head_commit.message, '[skip ci]') == false &&
-      (github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/'))
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ${{ matrix.os }}
     strategy:
