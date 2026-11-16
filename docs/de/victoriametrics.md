@@ -1,8 +1,22 @@
+# ioBroker.victoriametrics – Dokumentation (Deutsch)
+
+Schreibt die Historie von ioBroker-Datenpunkten nativ in [VictoriaMetrics](https://victoriametrics.com/) –
+über die [JSON-Lines-Import-API](https://docs.victoriametrics.com/#how-to-import-data-in-json-line-format),
+mit echten Prometheus-Labels statt Feldnamen-Suffixen (wie sie z. B. beim Schreiben über die
+InfluxDB-Kompatibilitätsschicht entstehen, etwa `Living_Room_Temperature_value`).
+
+Der Adapter puffert und schreibt Datenpunkt-Änderungen nach VictoriaMetrics und beantwortet
+`getHistory()`-Anfragen (damit vis-Chart-Widgets ihn direkt abfragen können) – Details und bekannte
+Einschränkungen siehe [Lesepfad](#lesepfad). Für die Visualisierung außerhalb von vis (z. B. Grafana)
+VictoriaMetrics direkt per PromQL abfragen. Der Adapter ist im ioBroker-Repository *latest* (Beta) verfügbar.
+
+Die Dokumentation in englischer Sprache steht in der [README](../../README.md).
+
 ## Voraussetzungen
 
 - Eine laufende VictoriaMetrics-Instanz (Single-Node), erreichbar per HTTP(S) – siehe
   [Installation von VictoriaMetrics](#installation-von-victoriametrics) unten
-- ioBroker js-controller >= 6.0.11, Admin >= 7.7.2
+- ioBroker js-controller >= 6.0.11, Admin >= 7.7.2, Node.js >= 22.19.0
 
 ## Installation von VictoriaMetrics
 
@@ -93,7 +107,7 @@ aktuell eingegebenen (noch nicht gespeicherten) Werten geprüft; bei Erfolg zeig
 zusätzlich die aktuell konfigurierte Retention an.
 
 Beim Start des Adapters wird zusätzlich die aktuell auf dem VM-Server konfigurierte Retention
-geloggt (`VictoriaMetrics unter ... erreichbar (Retention: 100y)`) – reines Anzeigen, siehe
+geloggt (`VictoriaMetrics reachable at ... (Retention: 100y)`) – reines Anzeigen, siehe
 [Retention](#retention) unten, warum sich das nicht über den Adapter ändern lässt.
 
 In der linken Seitenleiste von ioBroker.admin erscheint außerdem ein **"VictoriaMetrics"**-Menüpunkt
@@ -196,6 +210,10 @@ Bibliothek, die `iobroker.influxdb`, `iobroker.sql` und `iobroker.history` für
 Bucket-Aggregation (Durchschnitt/Min/Max/Summe/Anzahl/Perzentil/...), Lücken-Behandlung und
 Rand-Interpolation verwenden. Dadurch funktionieren grundsätzlich alle Standard-Aggregationstypen,
 ohne dass dieser Adapter die Bucket-Logik selbst nachbauen musste.
+
+**Eigene Intervalle:** Die Option `intervalBorders` von `@iobroker/aggregate` (z. B. Kalendertage, die beim
+Wechsel der Sommerzeit 23 oder 25 Stunden lang sind) wird unterstützt. Der Lesezeitraum ergibt sich aus den
+Grenzen und es wird der Rohdaten-Pfad verwendet, da das Pushdown nur mit einem festen Step arbeitet.
 
 **Serverseitiges Pushdown:** für die Aggregationsmethoden `average`, `min`, `max`, `total` und
 `count` mit bekanntem Zeit-`step` rechnet VictoriaMetrics selbst per PromQL (`avg_over_time`,
@@ -345,13 +363,15 @@ VictoriaMetrics' Retention ist ein **serverseitiges Start-Flag** (`-retentionPer
 VM-Prozesses selbst, nicht per HTTP-API zur Laufzeit änderbar (anders als z.B. InfluxDB, wo der
 Adapter per `ALTER RETENTION POLICY` aktiv einen Wert setzen kann). Dieser Adapter zeigt die
 aktuell konfigurierte Retention deshalb nur lesend an – zum Ändern muss VM mit einem anderen
-`-retentionPeriod`-Wert neu gestartet werden (bei Docker: den `--retentionPeriod=...`-Parameter
-im `docker run`/`docker-compose.yml` ändern und den Container neu erstellen).
+`-retentionPeriod`-Wert neu gestartet werden (eigenes Docker: den `--retentionPeriod=...`-Parameter
+im `docker run`/`docker-compose.yml` ändern und den Container neu erstellen; mit der
+[Docker-Option des Adapters](#docker-vom-adapter-verwalten-lassen): das Feld **Aufbewahrungsdauer
+(Retention)** ändern).
 
 Sichtbar ist die aktuelle Retention an drei Stellen (alle read-only, beim Adapterstart einmalig
 vom `/flags`-Endpunkt gelesen):
 - Datenpunkt **`<instance>.info.retention`** (String, z.B. `"100y"`) – für Skripte/VIS
-- Log-Eintrag beim Start (`VictoriaMetrics unter ... erreichbar (Retention: 100y)`)
+- Log-Eintrag beim Start (`VictoriaMetrics reachable at ... (Retention: 100y)`)
 - Erfolgs-Meldung des Buttons **"Verbindung testen"** im Tab "Verbindung"
 
 **Details:**

@@ -1,68 +1,47 @@
-import * as metricName from './metricName';
+import { buildLabels, deriveMetricName } from './metricName';
+import * as vm from './vmClient';
 import type { Victoriametrics } from '../main';
 
 /**
- * Löst für eine ioBroker-Objekt-ID den zugehörigen Metriknamen auf (frischer
- * Objekt-Lookup + dieselbe Ableitung wie beim Schreiben), damit deleteAll
- * konsistent mit der tatsächlich geschriebenen Metrik arbeitet.
- *
- * @param adapter - Adapterinstanz
- * @param id - ioBroker-Objekt-ID
- * @returns Normalisierter Metrikname
+ * @param adapter - Adapter instance
+ * @param obj - The received message
+ * @param payload - Response to send back
  */
-async function resolveMetricName(adapter: Victoriametrics, id: string): Promise<string> {
-    const foreignObj = await adapter.getForeignObjectAsync(id);
-    const settings =
-        foreignObj && foreignObj.common && foreignObj.common.custom && foreignObj.common.custom[adapter.namespace];
-    return metricName.deriveMetricName(id, settings, adapter.log);
+function reply(adapter: Victoriametrics, obj: ioBroker.Message, payload: object): void {
+    adapter.sendTo(obj.from, obj.command, payload, obj.callback);
 }
 
 /**
- * Normalisiert obj.message der storeState-Nachricht zu einer flachen Liste von
- * {id, state, rules}-Einträgen. Akzeptierte Formen (aus iobroker.influxdb
- * übernommen): {id, state, rules?}, {id, state:[...], rules?}, oder ein Array davon.
- *
- * @param message - obj.message
- * @returns Flache Liste
+ * @param adapter - Adapter instance
+ * @param obj - The received message
  */
-function flattenStoreStateMessage(message: unknown): { id: string; state: ioBroker.State; rules?: boolean }[] {
-    const entries = Array.isArray(message) ? message : [message];
-    const flat: { id: string; state: ioBroker.State; rules?: boolean }[] = [];
-    for (const entry of entries) {
-        if (!entry || !entry.id || !entry.state) {
-            continue;
-        }
-        const states = Array.isArray(entry.state) ? entry.state : [entry.state];
-        for (const state of states) {
-            if (state) {
-                flat.push({ id: entry.id, state, rules: entry.rules });
-            }
-        }
-    }
-    return flat;
+function replyInvalid(adapter: Victoriametrics, obj: ioBroker.Message): void {
+    reply(adapter, obj, { error: `Invalid call: ${JSON.stringify(obj.message)}` });
 }
 
 /**
- * Behandelt eine storeState-Nachricht: schreibt einen oder mehrere historische
- * Punkte in den Puffer, z.B. für ein Migrationsskript, das alte Historie aus
- * einer anderen Quelle (z.B. InfluxDB) nachträglich importiert. Erfordert
- * bewusst NICHT, dass der Datenpunkt aktuell für Live-Historisierung aktiviert
- * ist - ein expliziter storeState-Aufruf ist unabhängig davon zulässig.
+ * Answers `storeState`: writes historical points, e.g. to import old history from another source.
+ * Accepts `{id, state, rules?}`, `{id, state: [...]}` or an array of these. The datapoint does not
+ * have to be enabled for live history.
  *
- * `rules:true` wendet Rundung + Schwellenwert-/Nullwert-Filter an (Werte-
- * Validität, sinnvoll auch für Importe). debounceTime/blockTime/changesMinDelta
- * werden bewusst NIE angewendet, unabhängig von rules - diese sind auf Live-
- * Zustandsänderungen ausgelegt (zeitbasierte Rate-Limits, Vergleich mit dem
- * zuletzt geschriebenen Wert) und ergeben für rückdatierte Bulk-Importe keinen
- * Sinn.
+ * `rules: true` applies the value filters and rounding. Debounce, block time and minimum change
+ * are never applied: they are meant for live changes, not for backdated imports.
  *
- * @param adapter - Adapterinstanz
- * @param obj - Empfangene storeState-Nachricht
+ * @param adapter - Adapter instance
+ * @param obj - The message
  */
 export async function handleStoreState(adapter: Victoriametrics, obj: ioBroker.Message): Promise<void> {
-    const entries = flattenStoreStateMessage(obj.message);
+    const entries = (Array.isArray(obj.message) ? obj.message : [obj.message]).flatMap(
+        (entry: { id?: string; state?: ioBroker.State | ioBroker.State[]; rules?: boolean } | null) =>
+            entry?.id && entry.state
+                ? [entry.state]
+                      .flat()
+                      .filter(Boolean)
+                      .map(state => ({ id: entry.id as string, state, rules: entry.rules }))
+                : [],
+    );
     if (!entries.length) {
-        adapter.sendTo(obj.from, obj.command, { error: `Invalid call: ${JSON.stringify(obj.message)}` }, obj.callback);
+        replyInvalid(adapter, obj);
         return;
     }
 
@@ -71,36 +50,25 @@ export async function handleStoreState(adapter: Victoriametrics, obj: ioBroker.M
 
     for (const { id, state, rules } of entries) {
         try {
-            const converted = adapter._convertValue(state.val, id);
+            const converted = adapter.convertValue(state.val, id);
             if (converted === null) {
                 errors.push(`${id}: Value "${state.val}" is not a number`);
                 continue;
             }
 
-            const foreignObj = await adapter.getForeignObjectAsync(id);
-            const settings =
-                (foreignObj &&
-                    foreignObj.common &&
-                    foreignObj.common.custom &&
-                    foreignObj.common.custom[adapter.namespace]) ||
-                {};
-            const common = ((foreignObj && foreignObj.common) || {}) as Partial<ioBroker.StateCommon>;
-
-            let value = converted;
-            if (rules) {
-                if (adapter._isOutsideThreshold(value, settings) || adapter._isIgnoredZero(value, settings)) {
-                    continue;
-                }
-                value = adapter._applyRounding(value, settings);
+            const { settings, unit } = await adapter.getPointInfo(id);
+            const value = rules ? adapter.filter.validate(converted, settings) : converted;
+            if (value === null) {
+                continue;
             }
 
-            const name = metricName.deriveMetricName(id, settings, adapter.log);
-            const labels: Record<string, string> = {};
-            if (common.unit) {
-                labels.unit = metricName.sanitizeLabelValue(common.unit);
-            }
-
-            adapter.buffer.add({ pointId: id, metricName: name, labels, value, ts: state.ts || Date.now() });
+            adapter.buffer.add({
+                pointId: id,
+                metricName: deriveMetricName(id, settings, adapter.log),
+                labels: buildLabels(unit),
+                value,
+                ts: state.ts || Date.now(),
+            });
             successCount++;
         } catch (err) {
             errors.push(`${id}: ${(err as Error).message}`);
@@ -108,61 +76,44 @@ export async function handleStoreState(adapter: Victoriametrics, obj: ioBroker.M
     }
 
     if (errors.length) {
-        adapter.sendTo(
-            obj.from,
-            obj.command,
-            { error: `${errors.length} errors happened while storing data`, errors, successCount },
-            obj.callback,
-        );
+        reply(adapter, obj, { error: `${errors.length} errors happened while storing data`, errors, successCount });
     } else {
-        adapter.sendTo(obj.from, obj.command, { success: true, successCount, connected: true }, obj.callback);
+        reply(adapter, obj, { success: true, successCount, connected: true });
     }
 }
 
 /**
- * Behandelt eine deleteAll-Nachricht: löscht die komplette in VictoriaMetrics
- * gespeicherte Historie eines oder mehrerer Datenpunkte (ganze Zeitreihe per
- * Label-Match - VictoriaMetrics kennt keine Einzelpunkt-Löschung, siehe README).
+ * Answers `deleteAll`: deletes the whole stored history of one or more datapoints. VictoriaMetrics
+ * deletes whole time series only, so `delete`, `deleteRange` and `update` are not offered.
  *
- * @param adapter - Adapterinstanz
- * @param obj - Empfangene deleteAll-Nachricht ({id} oder [{id}, ...])
+ * @param adapter - Adapter instance
+ * @param obj - The message ({id} or [{id}, ...])
  */
 export async function handleDeleteAll(adapter: Victoriametrics, obj: ioBroker.Message): Promise<void> {
-    const entries = Array.isArray(obj.message) ? obj.message : [obj.message];
-    const ids = entries.filter(entry => entry && entry.id).map(entry => entry.id);
-
+    const ids: string[] = (Array.isArray(obj.message) ? obj.message : [obj.message])
+        .filter((entry: { id?: string } | null) => entry?.id)
+        .map((entry: { id: string }) => entry.id);
     if (!ids.length) {
-        adapter.sendTo(obj.from, obj.command, { error: `Invalid call: ${JSON.stringify(obj.message)}` }, obj.callback);
+        replyInvalid(adapter, obj);
         return;
     }
 
     for (const id of ids) {
-        const name = await resolveMetricName(adapter, id);
-        const result = await adapter.vmClient.deleteSeries(adapter.connection, name);
+        const result = await vm.deleteSeries(adapter.connection, await adapter.metricNameOf(id));
         if (!result.ok) {
-            adapter.sendTo(
-                obj.from,
-                obj.command,
-                { success: false, error: result.error, connected: false },
-                obj.callback,
-            );
+            reply(adapter, obj, { success: false, error: result.error, connected: false });
             return;
         }
     }
-
-    adapter.sendTo(obj.from, obj.command, { success: true, connected: true }, obj.callback);
+    reply(adapter, obj, { success: true, connected: true });
 }
 
 /**
- * Behandelt eine features-Nachricht (Capability-Discovery). Bewirbt nur, was
- * tatsächlich implementiert ist - insbesondere KEIN delete/deleteRange/update,
- * da VictoriaMetrics keine Einzelpunkt-Löschung/-Bearbeitung unterstützt und
- * Admin sonst einen Lösch-Button anzeigen würde, der nicht das tut, was er
- * verspricht.
+ * Answers `features`: the supported commands.
  *
- * @param adapter - Adapterinstanz
- * @param obj - Empfangene features-Nachricht
+ * @param adapter - Adapter instance
+ * @param obj - The message
  */
 export function handleFeatures(adapter: Victoriametrics, obj: ioBroker.Message): void {
-    adapter.sendTo(obj.from, obj.command, { supportedFeatures: ['storeState', 'deleteAll'] }, obj.callback);
+    reply(adapter, obj, { supportedFeatures: ['storeState', 'deleteAll'] });
 }

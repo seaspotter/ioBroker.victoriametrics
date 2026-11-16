@@ -18,14 +18,18 @@ export default [
             'admin/admin.d.ts',
             'admin/blockly.js',
             '**/adapter-config.d.ts',
-            'widgets/**/*.js'
+            'widgets/**/*.js',
         ],
     },
     {
         // you may disable some 'jsdoc' warnings - but using jsdoc is highly recommended
         // as this improves maintainability. jsdoc warnings will not block build process.
         rules: {
-            // 'jsdoc/require-jsdoc': 'off',
+            // Top-level functions need a doc comment; methods and interface properties do not
+            'jsdoc/require-jsdoc': [
+                'warn',
+                { require: { FunctionDeclaration: true }, contexts: ['TSInterfaceDeclaration'] },
+            ],
             // 'jsdoc/require-param': 'off',
             // 'jsdoc/require-param-description': 'off',
             // 'jsdoc/require-returns-description': 'off',

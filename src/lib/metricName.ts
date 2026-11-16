@@ -1,12 +1,12 @@
-import { CONFIG } from './config';
+const FALLBACK_NAME = 'metric_unnamed';
+const LABEL_VALUE_MAX_LEN = 128;
 
 /**
- * Normalisiert einen beliebigen String zu einem gültigen Prometheus-/
- * VictoriaMetrics-Metriknamen (`^[a-zA-Z_:][a-zA-Z0-9_:]*$`).
+ * Normalizes a string to a valid Prometheus metric name (`^[a-zA-Z_:][a-zA-Z0-9_:]*$`).
  *
- * @param raw - Roher Name (z.B. ioBroker-Objekt-ID oder aliasId)
- * @param [log] - Optionaler Logger für Warnungen
- * @returns Normalisierter Metrikname
+ * @param raw - Raw name, e.g. an object ID or alias
+ * @param log - Optional logger for the fallback warning
+ * @returns The normalized name
  */
 export function normalizeMetricName(raw: string | null | undefined, log?: ioBroker.Log): string {
     let name = String(raw || '')
@@ -17,40 +17,44 @@ export function normalizeMetricName(raw: string | null | undefined, log?: ioBrok
         .replace(/^_+|_+$/g, '');
 
     if (!name) {
-        log && log.warn(`Could not derive a valid metric name from "${raw}", using fallback`);
-        name = CONFIG.METRIC_NAME_FALLBACK;
+        log?.warn(`Could not derive a valid metric name from "${raw}", using fallback`);
+        name = FALLBACK_NAME;
     }
 
-    if (/^[0-9]/.test(name)) {
-        name = `_${name}`;
-    }
-
-    return name;
+    return /^[0-9]/.test(name) ? `_${name}` : name;
 }
 
 /**
- * Leitet den Metriknamen für einen Datenpunkt ab: bevorzugt die konfigurierte
- * aliasId, sonst die ioBroker-Objekt-ID selbst (stabil & eindeutig, im
- * Gegensatz zu common.name).
+ * Derives the metric name of a datapoint: the configured alias, else the object ID
+ * (stable, unlike `common.name`).
  *
- * @param objId - ioBroker-Objekt-ID
- * @param [customConfig] - Custom-Settings des Objekts für diesen Adapter
- * @param customConfig.aliasId
- * @param [log] - Optionaler Logger für Warnungen
- * @returns Normalisierter Metrikname
+ * @param objId - Object ID
+ * @param customConfig - Custom settings of the object for this adapter
+ * @param customConfig.aliasId - Configured metric name
+ * @param log - Optional logger
+ * @returns The normalized name
  */
 export function deriveMetricName(objId: string, customConfig?: { aliasId?: string }, log?: ioBroker.Log): string {
-    const alias = customConfig && customConfig.aliasId && String(customConfig.aliasId).trim();
+    const alias = customConfig?.aliasId && String(customConfig.aliasId).trim();
     return normalizeMetricName(alias || objId, log);
 }
 
 /**
- * Bereinigt einen Label-Wert (kein Zeichensatz-Limit bei VM-Labelwerten,
- * aber Länge begrenzen und trimmen).
+ * Trims a label value and caps its length.
  *
- * @param value - Roher Label-Wert
- * @returns Bereinigter Label-Wert
+ * @param value - Raw label value
+ * @returns The sanitized value
  */
 export function sanitizeLabelValue(value: unknown): string {
-    return String(value).trim().slice(0, CONFIG.LABEL_VALUE_MAX_LEN);
+    return String(value).trim().slice(0, LABEL_VALUE_MAX_LEN);
+}
+
+/**
+ * Builds the labels written with a point (currently only the unit).
+ *
+ * @param unit - `common.unit` of the object
+ * @returns The labels
+ */
+export function buildLabels(unit?: unknown): Record<string, string> {
+    return unit ? { unit: sanitizeLabelValue(unit) } : {};
 }
