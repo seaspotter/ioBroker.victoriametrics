@@ -10,6 +10,7 @@ describe('docker-compose.yaml', function () {
     const composeFile = path.join(__dirname, '..', 'docker-compose.yaml');
     const yaml = fs.readFileSync(composeFile, 'utf-8');
 
+    /** A service of the rendered compose file. */
     interface ContainerConfig {
         name: string;
         iobEnabled?: boolean;
@@ -17,6 +18,7 @@ describe('docker-compose.yaml', function () {
         [key: string]: unknown;
     }
 
+    /** Internals of the plugin's compose parser. */
     interface PluginInternals {
         parse: (yaml: string) => unknown;
         composeToContainerConfigs: (compose: unknown) => ContainerConfig[];

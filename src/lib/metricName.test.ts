@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { normalizeMetricName, deriveMetricName, sanitizeLabelValue } from './metricName';
+import { normalizeMetricName, deriveMetricName, sanitizeLabelValue, buildLabels } from './metricName';
 
 describe('metricName', () => {
     describe('normalizeMetricName', () => {
@@ -50,6 +50,14 @@ describe('metricName', () => {
         it('caps overly long values', () => {
             const long = 'x'.repeat(200);
             expect(sanitizeLabelValue(long)).to.have.length(128);
+        });
+    });
+
+    describe('buildLabels', () => {
+        it('sets the unit label only if there is a unit', () => {
+            expect(buildLabels('°C')).to.deep.equal({ unit: '°C' });
+            expect(buildLabels(undefined)).to.deep.equal({});
+            expect(buildLabels('')).to.deep.equal({});
         });
     });
 });

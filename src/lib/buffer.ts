@@ -1,50 +1,36 @@
-/**
- * Ein gepufferter Punkt: {pointId, metricName, labels, value, ts}
- * - pointId: ioBroker-Objekt-ID, für die der Fehlerzähler geführt wird
- * - metricName: normalisierter Prometheus-Metrikname
- * - labels: zusätzliche Labels (z.B. unit)
- * - value: numerischer Wert
- * - ts: Zeitstempel in Millisekunden (Unix-Epoch)
- */
+/** A buffered point not yet written to VictoriaMetrics. */
 export interface BufferedPoint {
-    /** ioBroker-Objekt-ID, für die der Fehlerzähler geführt wird */
+    /** Object ID, used for the error counter */
     pointId: string;
-    /** Normalisierter Prometheus-Metrikname */
     metricName: string;
-    /** Zusätzliche Labels (z.B. unit) */
     labels: Record<string, string>;
-    /** Numerischer Wert */
     value: number;
-    /** Zeitstempel in Millisekunden (Unix-Epoch) */
+    /** Unix epoch in ms */
     ts: number;
 }
 
-/**
- * Einfache, ioBroker-unabhängige Puffer-Datenstruktur für noch nicht
- * geschriebene Datenpunkte. Kennt weder HTTP noch Adapter-Zustand
- * (Fehlerzähler-Policy lebt bewusst in main.ts).
- */
+/** Buffer for points that are not yet written. Knows neither HTTP nor adapter state. */
 export class SeriesBuffer {
     private _points: BufferedPoint[] = [];
 
     /**
-     * @param point - Zu puffernder Punkt
+     * @param point - Point to buffer
      */
     add(point: BufferedPoint): void {
         this._points.push(point);
     }
 
     /**
-     * @returns Anzahl gepufferter Punkte
+     * @returns Number of buffered points
      */
     size(): number {
         return this._points.length;
     }
 
     /**
-     * Entfernt und liefert alle gepufferten Punkte.
+     * Removes and returns all buffered points.
      *
-     * @returns Alle bisher gepufferten Punkte
+     * @returns The points
      */
     drainAll(): BufferedPoint[] {
         const points = this._points;
@@ -53,42 +39,58 @@ export class SeriesBuffer {
     }
 
     /**
-     * Legt Punkte wieder in den Puffer zurück (z.B. nach fehlgeschlagenem Schreibversuch).
-     * Umgeht bewusst jegliche Größenbeschränkung.
+     * Puts points back, e.g. after a failed write. Ignores any size limit.
      *
-     * @param points - Wieder einzureihende Punkte
+     * @param points - Points to re-add
      */
     requeue(points: BufferedPoint[]): void {
         this._points.push(...points);
     }
 
     /**
-     * @param formatVersion - Cache-Format-Version, die mitgespeichert wird
-     * @returns Serialisierbare Repräsentation
+     * @param formatVersion - Cache format version to store
+     * @returns The serializable state
      */
     toJSON(formatVersion: number): { version: number; savedAt: number; points: BufferedPoint[] } {
-        return {
-            version: formatVersion,
-            savedAt: Date.now(),
-            points: this._points,
-        };
+        return { version: formatVersion, savedAt: Date.now(), points: this._points };
     }
 
     /**
-     * Erzeugt einen Puffer aus einer zuvor mit toJSON() erzeugten Struktur.
+     * Restores a buffer from `toJSON()` output; data of another format version is ignored.
      *
-     * @param data - Geladene Cache-Daten
-     * @param expectedVersion - Erwartetes Cache-Format
-     * @returns Neuer Puffer mit den geladenen Punkten
+     * @param data - Loaded cache data
+     * @param expectedVersion - Expected cache format version
+     * @returns The restored buffer
      */
     static fromJSON(
         data: { version?: number; points?: BufferedPoint[] } | null | undefined,
         expectedVersion: number,
     ): SeriesBuffer {
         const buffer = new SeriesBuffer();
-        if (data && data.version === expectedVersion && Array.isArray(data.points)) {
+        if (data?.version === expectedVersion && Array.isArray(data.points)) {
             buffer._points = data.points;
         }
         return buffer;
     }
+}
+
+/**
+ * Groups points by metric and labels into the newline-delimited JSON body of `/api/v1/import`.
+ *
+ * @param points - Points to write
+ * @returns The NDJSON body
+ */
+export function buildImportBody(points: BufferedPoint[]): string {
+    const groups = new Map<string, { metric: Record<string, string>; values: number[]; timestamps: number[] }>();
+    for (const { metricName, labels, value, ts } of points) {
+        const key = `${metricName}|${JSON.stringify(labels)}`;
+        let group = groups.get(key);
+        if (!group) {
+            group = { metric: { __name__: metricName, ...labels }, values: [], timestamps: [] };
+            groups.set(key, group);
+        }
+        group.values.push(value);
+        group.timestamps.push(ts);
+    }
+    return Array.from(groups.values(), group => JSON.stringify(group)).join('\n');
 }
